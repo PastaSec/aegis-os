@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aegis-os"
+version = "0.1.0a1"
+description = "Autonomous Emergency & General Information System"
+readme = "README.md"
+requires-python = ">=3.11"
+
+authors = [
+    { name = "Ian Terry" }
+]
+
+dependencies = [
+    "textual",
+    "rich",
+    "psutil",
+    "pyyaml",
+    "requests",
+    "pillow"
+]
+
+[project.scripts]
+aegis = "aegis.app:main"
+
+[tool.setuptools.packages.find]
+include = ["aegis*"]
+exclude = ["assets*", "config*", "data*", "docs*", "logs*", "scripts*", "systemd*", "tests*"]
