@@ -3,11 +3,12 @@ from textual.containers import Container
 from textual.events import Key
 from textual.widgets import Static
 
+from aegis.journal import categories as journal_categories, entries as journal_entries, read_entry, title_from_entry
 from aegis.knowledge import load_packs, read_document, search_documents
 from aegis.monitor import get_system_state
 
 
-HOME_ITEMS = ["Knowledge", "Community", "Notes", "Network", "Hardware", "Settings"]
+HOME_ITEMS = ["Knowledge", "Field Journal", "Community", "Network", "Hardware", "Settings"]
 
 
 class AegisDashboard(App):
@@ -41,6 +42,9 @@ class AegisDashboard(App):
         self.current_doc = None
         self.search_results = []
         self.search_query = ""
+        self.journal_categories = []
+        self.current_journal_category = None
+        self.current_journal_entry = None
 
     def compose(self) -> ComposeResult:
         with Container(id="main"):
@@ -53,6 +57,7 @@ class AegisDashboard(App):
 
     def on_mount(self) -> None:
         self.packs = load_packs()
+        self.journal_categories = journal_categories()
         self.update_screen()
         self.set_interval(2, self.periodic_update)
 
@@ -91,15 +96,9 @@ class AegisDashboard(App):
         self.search_query = ""
         self.render_search_input()
 
-    def render_search_input(self) -> None:
-        self.query_one("#title", Static).update("Search")
-        self.query_one("#status", Static).update("Knowledge Search")
-        self.query_one("#body", Static).update("Type search term, Enter to run")
-        self.query_one("#menu", Static).update(f"/ {self.search_query}_")
-        self.query_one("#message", Static).update("Esc Cancel")
-
     def action_refresh(self) -> None:
         self.packs = load_packs()
+        self.journal_categories = journal_categories()
         self.update_screen()
 
     def action_back(self) -> None:
@@ -116,6 +115,14 @@ class AegisDashboard(App):
             self.screen_name = "knowledge"
             self.current_pack = None
         elif self.screen_name == "knowledge":
+            self.screen_name = "home"
+        elif self.screen_name == "journal_entry":
+            self.screen_name = "journal_category"
+            self.current_journal_entry = None
+        elif self.screen_name == "journal_category":
+            self.screen_name = "journal"
+            self.current_journal_category = None
+        elif self.screen_name == "journal":
             self.screen_name = "home"
 
         self.selected_index = 0
@@ -138,6 +145,9 @@ class AegisDashboard(App):
             item = HOME_ITEMS[self.selected_index]
             if item == "Knowledge":
                 self.screen_name = "knowledge"
+                self.selected_index = 0
+            elif item == "Field Journal":
+                self.screen_name = "journal"
                 self.selected_index = 0
             else:
                 self.query_one("#message", Static).update(f"{item} module not built yet")
@@ -162,6 +172,17 @@ class AegisDashboard(App):
             })()
             self.screen_name = "document"
 
+        elif self.screen_name == "journal" and self.journal_categories:
+            self.current_journal_category = self.journal_categories[self.selected_index]
+            self.screen_name = "journal_category"
+            self.selected_index = 0
+
+        elif self.screen_name == "journal_category":
+            items = journal_entries(self.current_journal_category) if self.current_journal_category else []
+            if items:
+                self.current_journal_entry = items[self.selected_index]
+                self.screen_name = "journal_entry"
+
         self.update_screen()
 
     def item_count(self) -> int:
@@ -173,6 +194,10 @@ class AegisDashboard(App):
             return len(self.current_pack.documents)
         if self.screen_name == "search_results":
             return len(self.search_results)
+        if self.screen_name == "journal":
+            return len(self.journal_categories)
+        if self.screen_name == "journal_category" and self.current_journal_category:
+            return len(journal_entries(self.current_journal_category))
         return 0
 
     def update_screen(self) -> None:
@@ -186,6 +211,12 @@ class AegisDashboard(App):
             self.render_document()
         elif self.screen_name == "search_results":
             self.render_search_results()
+        elif self.screen_name == "journal":
+            self.render_journal()
+        elif self.screen_name == "journal_category":
+            self.render_journal_category()
+        elif self.screen_name == "journal_entry":
+            self.render_journal_entry()
 
     def render_home(self) -> None:
         state = get_system_state()
@@ -201,7 +232,6 @@ class AegisDashboard(App):
             f"Pwr  {state.power}\n"
             f"Up   {state.uptime}"
         )
-
         self.query_one("#menu", Static).update(
             "\n".join(
                 f"{'>' if i == self.selected_index else ' '} {i + 1} {item}"
@@ -210,11 +240,17 @@ class AegisDashboard(App):
         )
         self.query_one("#message", Static).update("")
 
+    def render_search_input(self) -> None:
+        self.query_one("#title", Static).update("Search")
+        self.query_one("#status", Static).update("Knowledge Search")
+        self.query_one("#body", Static).update("Type search term, Enter to run")
+        self.query_one("#menu", Static).update(f"/ {self.search_query}_")
+        self.query_one("#message", Static).update("Esc Cancel")
+
     def render_knowledge(self) -> None:
         self.query_one("#title", Static).update("Knowledge")
         self.query_one("#status", Static).update(f"Installed Packs: {len(self.packs)}")
         self.query_one("#body", Static).update("Select a knowledge pack")
-
         self.query_one("#menu", Static).update(
             "\n".join(
                 f"{'>' if i == self.selected_index else ' '} {i + 1} {(pack.icon + ' ' + pack.name).strip()}"
@@ -226,7 +262,6 @@ class AegisDashboard(App):
     def render_pack(self) -> None:
         pack = self.current_pack
         docs = pack.documents if pack else []
-
         self.query_one("#title", Static).update(pack.name if pack else "Pack")
         self.query_one("#status", Static).update("Documents")
         self.query_one("#body", Static).update(pack.description if pack else "")
@@ -242,7 +277,6 @@ class AegisDashboard(App):
         self.query_one("#title", Static).update("Search")
         self.query_one("#status", Static).update(f"Results: {len(self.search_results)}")
         self.query_one("#body", Static).update(f"Query: {self.search_query}")
-
         self.query_one("#menu", Static).update(
             "\n".join(
                 f"{'>' if i == self.selected_index else ' '} {result.pack_name}: {result.document_title}"
@@ -255,9 +289,44 @@ class AegisDashboard(App):
         doc = self.current_doc
         text = read_document(doc.path) if doc else "No document selected"
         preview = "\n".join(text.splitlines()[:14])
-
         self.query_one("#title", Static).update(doc.title if doc else "Document")
         self.query_one("#status", Static).update("Markdown Viewer")
+        self.query_one("#body", Static).update(preview)
+        self.query_one("#menu", Static).update("")
+        self.query_one("#message", Static).update("Esc Back")
+
+    def render_journal(self) -> None:
+        self.query_one("#title", Static).update("Field Journal")
+        self.query_one("#status", Static).update(f"Categories: {len(self.journal_categories)}")
+        self.query_one("#body", Static).update("Select a journal category")
+        self.query_one("#menu", Static).update(
+            "\n".join(
+                f"{'>' if i == self.selected_index else ' '} {i + 1} {cat.title()}"
+                for i, cat in enumerate(self.journal_categories)
+            ) or "No journal categories found"
+        )
+        self.query_one("#message", Static).update("Esc Back")
+
+    def render_journal_category(self) -> None:
+        category = self.current_journal_category or "journal"
+        items = journal_entries(category)
+        self.query_one("#title", Static).update(category.title())
+        self.query_one("#status", Static).update(f"Entries: {len(items)}")
+        self.query_one("#body", Static).update("Select an entry")
+        self.query_one("#menu", Static).update(
+            "\n".join(
+                f"{'>' if i == self.selected_index else ' '} {i + 1} {title_from_entry(entry)}"
+                for i, entry in enumerate(items)
+            ) or "No entries found"
+        )
+        self.query_one("#message", Static).update("Esc Back")
+
+    def render_journal_entry(self) -> None:
+        entry = self.current_journal_entry
+        text = read_entry(entry) if entry else "No entry selected"
+        preview = "\n".join(text.splitlines()[:14])
+        self.query_one("#title", Static).update(title_from_entry(entry) if entry else "Entry")
+        self.query_one("#status", Static).update("Field Journal")
         self.query_one("#body", Static).update(preview)
         self.query_one("#menu", Static).update("")
         self.query_one("#message", Static).update("Esc Back")
