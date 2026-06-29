@@ -1,19 +1,13 @@
 from textual.app import App, ComposeResult
 from textual.containers import Container
+from textual.events import Key
 from textual.widgets import Static
 
-from aegis.knowledge import load_packs, read_document
+from aegis.knowledge import load_packs, read_document, search_documents
 from aegis.monitor import get_system_state
 
 
-HOME_ITEMS = [
-    "Knowledge",
-    "Community",
-    "Notes",
-    "Network",
-    "Hardware",
-    "Settings",
-]
+HOME_ITEMS = ["Knowledge", "Community", "Notes", "Network", "Hardware", "Settings"]
 
 
 class AegisDashboard(App):
@@ -32,15 +26,10 @@ class AegisDashboard(App):
         ("q", "quit", "Quit"),
         ("escape", "back", "Back"),
         ("r", "refresh", "Refresh"),
+        ("/", "search", "Search"),
         ("up,k", "cursor_up", "Up"),
         ("down,j", "cursor_down", "Down"),
         ("enter", "select", "Select"),
-        ("1", "choose_1", "One"),
-        ("2", "choose_2", "Two"),
-        ("3", "choose_3", "Three"),
-        ("4", "choose_4", "Four"),
-        ("5", "choose_5", "Five"),
-        ("6", "choose_6", "Six"),
     ]
 
     def __init__(self):
@@ -50,6 +39,8 @@ class AegisDashboard(App):
         self.packs = []
         self.current_pack = None
         self.current_doc = None
+        self.search_results = []
+        self.search_query = ""
 
     def compose(self) -> ComposeResult:
         with Container(id="main"):
@@ -58,7 +49,7 @@ class AegisDashboard(App):
             yield Static("", id="body")
             yield Static("", id="menu")
             yield Static("", id="message")
-            yield Static("↑↓ Move | Enter Open | Esc Back | Q Quit", id="hint")
+            yield Static("↑↓ Move | Enter Open | / Search | Esc Back | Q Quit", id="hint")
 
     def on_mount(self) -> None:
         self.packs = load_packs()
@@ -69,19 +60,64 @@ class AegisDashboard(App):
         if self.screen_name == "home":
             self.update_screen()
 
+    def on_key(self, event: Key) -> None:
+        if self.screen_name != "search_input":
+            return
+
+        event.stop()
+
+        if event.key == "enter":
+            self.search_results = search_documents(self.search_query)
+            self.screen_name = "search_results"
+            self.selected_index = 0
+            self.update_screen()
+            return
+
+        if event.key == "backspace":
+            self.search_query = self.search_query[:-1]
+            self.render_search_input()
+            return
+
+        if event.key == "escape":
+            self.action_back()
+            return
+
+        if len(event.character or "") == 1:
+            self.search_query += event.character
+            self.render_search_input()
+
+    def action_search(self) -> None:
+        self.screen_name = "search_input"
+        self.search_query = ""
+        self.render_search_input()
+
+    def render_search_input(self) -> None:
+        self.query_one("#title", Static).update("Search")
+        self.query_one("#status", Static).update("Knowledge Search")
+        self.query_one("#body", Static).update("Type search term, Enter to run")
+        self.query_one("#menu", Static).update(f"/ {self.search_query}_")
+        self.query_one("#message", Static).update("Esc Cancel")
+
     def action_refresh(self) -> None:
         self.packs = load_packs()
         self.update_screen()
 
     def action_back(self) -> None:
-        if self.screen_name == "document":
-            self.screen_name = "pack"
+        if self.screen_name == "search_input":
+            self.screen_name = "home"
+            self.search_query = ""
+        elif self.screen_name == "search_results":
+            self.screen_name = "home"
+            self.search_results = []
+        elif self.screen_name == "document":
+            self.screen_name = "pack" if self.current_pack else "search_results"
             self.current_doc = None
         elif self.screen_name == "pack":
             self.screen_name = "knowledge"
             self.current_pack = None
         elif self.screen_name == "knowledge":
             self.screen_name = "home"
+
         self.selected_index = 0
         self.update_screen()
 
@@ -106,11 +142,10 @@ class AegisDashboard(App):
             else:
                 self.query_one("#message", Static).update(f"{item} module not built yet")
 
-        elif self.screen_name == "knowledge":
-            if self.packs:
-                self.current_pack = self.packs[self.selected_index]
-                self.screen_name = "pack"
-                self.selected_index = 0
+        elif self.screen_name == "knowledge" and self.packs:
+            self.current_pack = self.packs[self.selected_index]
+            self.screen_name = "pack"
+            self.selected_index = 0
 
         elif self.screen_name == "pack":
             docs = self.current_pack.documents if self.current_pack else []
@@ -118,20 +153,16 @@ class AegisDashboard(App):
                 self.current_doc = docs[self.selected_index]
                 self.screen_name = "document"
 
+        elif self.screen_name == "search_results" and self.search_results:
+            result = self.search_results[self.selected_index]
+            self.current_pack = None
+            self.current_doc = type("SearchDoc", (), {
+                "title": result.document_title,
+                "path": result.path,
+            })()
+            self.screen_name = "document"
+
         self.update_screen()
-
-    def choose_number(self, number: int) -> None:
-        index = number - 1
-        if index < self.item_count():
-            self.selected_index = index
-            self.action_select()
-
-    def action_choose_1(self): self.choose_number(1)
-    def action_choose_2(self): self.choose_number(2)
-    def action_choose_3(self): self.choose_number(3)
-    def action_choose_4(self): self.choose_number(4)
-    def action_choose_5(self): self.choose_number(5)
-    def action_choose_6(self): self.choose_number(6)
 
     def item_count(self) -> int:
         if self.screen_name == "home":
@@ -140,6 +171,8 @@ class AegisDashboard(App):
             return len(self.packs)
         if self.screen_name == "pack" and self.current_pack:
             return len(self.current_pack.documents)
+        if self.screen_name == "search_results":
+            return len(self.search_results)
         return 0
 
     def update_screen(self) -> None:
@@ -151,20 +184,15 @@ class AegisDashboard(App):
             self.render_pack()
         elif self.screen_name == "document":
             self.render_document()
+        elif self.screen_name == "search_results":
+            self.render_search_results()
 
     def render_home(self) -> None:
         state = get_system_state()
-        status_color = {
-            "READY": "green",
-            "DEGRADED": "yellow",
-            "HOT": "red",
-            "UNKNOWN": "white",
-        }.get(state.readiness, "white")
+        color = {"READY": "green", "DEGRADED": "yellow", "HOT": "red"}.get(state.readiness, "white")
 
         self.query_one("#title", Static).update("AEGIS OS")
-        self.query_one("#status", Static).update(
-            f"[{status_color}]STATUS {state.readiness}[/{status_color}]"
-        )
+        self.query_one("#status", Static).update(f"[{color}]STATUS {state.readiness}[/{color}]")
         self.query_one("#body", Static).update(
             f"Host {state.host}\n"
             f"IP   {state.ip}\n"
@@ -174,12 +202,12 @@ class AegisDashboard(App):
             f"Up   {state.uptime}"
         )
 
-        lines = []
-        for i, item in enumerate(HOME_ITEMS):
-            prefix = ">" if i == self.selected_index else " "
-            lines.append(f"{prefix} {i + 1} {item}")
-
-        self.query_one("#menu", Static).update("\n".join(lines))
+        self.query_one("#menu", Static).update(
+            "\n".join(
+                f"{'>' if i == self.selected_index else ' '} {i + 1} {item}"
+                for i, item in enumerate(HOME_ITEMS)
+            )
+        )
         self.query_one("#message", Static).update("")
 
     def render_knowledge(self) -> None:
@@ -187,43 +215,46 @@ class AegisDashboard(App):
         self.query_one("#status", Static).update(f"Installed Packs: {len(self.packs)}")
         self.query_one("#body", Static).update("Select a knowledge pack")
 
-        if not self.packs:
-            menu = "No packs found\nAdd packs to knowledge/packs/"
-        else:
-            lines = []
-            for i, pack in enumerate(self.packs):
-                prefix = ">" if i == self.selected_index else " "
-                label = f"{pack.icon} {pack.name}".strip()
-                lines.append(f"{prefix} {i + 1} {label}")
-            menu = "\n".join(lines)
-
-        self.query_one("#menu", Static).update(menu)
-        self.query_one("#message", Static).update("Esc Back")
+        self.query_one("#menu", Static).update(
+            "\n".join(
+                f"{'>' if i == self.selected_index else ' '} {i + 1} {(pack.icon + ' ' + pack.name).strip()}"
+                for i, pack in enumerate(self.packs)
+            ) or "No packs found"
+        )
+        self.query_one("#message", Static).update("Esc Back | / Search")
 
     def render_pack(self) -> None:
         pack = self.current_pack
+        docs = pack.documents if pack else []
+
         self.query_one("#title", Static).update(pack.name if pack else "Pack")
         self.query_one("#status", Static).update("Documents")
         self.query_one("#body", Static).update(pack.description if pack else "")
+        self.query_one("#menu", Static).update(
+            "\n".join(
+                f"{'>' if i == self.selected_index else ' '} {i + 1} {doc.title}"
+                for i, doc in enumerate(docs)
+            ) or "No Markdown documents found"
+        )
+        self.query_one("#message", Static).update("Esc Back | / Search")
 
-        docs = pack.documents if pack else []
-        if not docs:
-            menu = "No Markdown documents found"
-        else:
-            lines = []
-            for i, doc in enumerate(docs):
-                prefix = ">" if i == self.selected_index else " "
-                lines.append(f"{prefix} {i + 1} {doc.title}")
-            menu = "\n".join(lines)
+    def render_search_results(self) -> None:
+        self.query_one("#title", Static).update("Search")
+        self.query_one("#status", Static).update(f"Results: {len(self.search_results)}")
+        self.query_one("#body", Static).update(f"Query: {self.search_query}")
 
-        self.query_one("#menu", Static).update(menu)
-        self.query_one("#message", Static).update("Esc Back")
+        self.query_one("#menu", Static).update(
+            "\n".join(
+                f"{'>' if i == self.selected_index else ' '} {result.pack_name}: {result.document_title}"
+                for i, result in enumerate(self.search_results[:6])
+            ) or "No matches found"
+        )
+        self.query_one("#message", Static).update("Enter Open | Esc Back")
 
     def render_document(self) -> None:
         doc = self.current_doc
         text = read_document(doc.path) if doc else "No document selected"
-        lines = text.splitlines()
-        preview = "\n".join(lines[:14])
+        preview = "\n".join(text.splitlines()[:14])
 
         self.query_one("#title", Static).update(doc.title if doc else "Document")
         self.query_one("#status", Static).update("Markdown Viewer")
