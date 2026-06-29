@@ -5,8 +5,9 @@ from textual.widgets import Static
 
 from aegis.inventory import categories as inventory_categories, items as inventory_items, read_item, title_from_item
 from aegis.journal import categories as journal_categories, entries as journal_entries, read_entry, title_from_entry
-from aegis.knowledge import load_packs, read_document, search_documents
+from aegis.knowledge import load_packs, read_document
 from aegis.monitor import get_system_state
+from aegis.search import search_all
 
 
 HOME_ITEMS = ["Knowledge", "Field Journal", "Inventory", "Community", "Hardware", "Settings"]
@@ -84,7 +85,7 @@ class AegisDashboard(App):
         event.stop()
 
         if event.key == "enter":
-            self.search_results = search_documents(self.search_query)
+            self.search_results = search_all(self.search_query)
             self.screen_name = "search_results"
             self.selected_index = 0
             self.update_screen()
