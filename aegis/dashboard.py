@@ -5,6 +5,16 @@ from textual.widgets import Static
 from aegis.monitor import get_system_state
 
 
+MENU_ITEMS = [
+    "Knowledge",
+    "Community",
+    "Notes",
+    "Network",
+    "Hardware",
+    "Settings",
+]
+
+
 class AegisDashboard(App):
     CSS = """
     Screen {
@@ -37,6 +47,11 @@ class AegisDashboard(App):
         height: auto;
     }
 
+    #message {
+        color: yellow;
+        height: 1;
+    }
+
     #hint {
         color: gray;
         height: 1;
@@ -46,7 +61,18 @@ class AegisDashboard(App):
     BINDINGS = [
         ("q", "quit", "Quit"),
         ("r", "refresh", "Refresh"),
+        ("up,k", "cursor_up", "Up"),
+        ("down,j", "cursor_down", "Down"),
+        ("enter", "select", "Select"),
+        ("1", "choose_1", "Knowledge"),
+        ("2", "choose_2", "Community"),
+        ("3", "choose_3", "Notes"),
+        ("4", "choose_4", "Network"),
+        ("5", "choose_5", "Hardware"),
+        ("6", "choose_6", "Settings"),
     ]
+
+    selected_index = 0
 
     def compose(self) -> ComposeResult:
         with Container(id="main"):
@@ -54,7 +80,8 @@ class AegisDashboard(App):
             yield Static("", id="status")
             yield Static("", id="stats")
             yield Static("", id="menu")
-            yield Static("Q Quit | R Refresh", id="hint")
+            yield Static("", id="message")
+            yield Static("↑↓ Select | Enter Open | Q Quit", id="hint")
 
     def on_mount(self) -> None:
         self.update_dashboard()
@@ -62,6 +89,41 @@ class AegisDashboard(App):
 
     def action_refresh(self) -> None:
         self.update_dashboard()
+
+    def action_cursor_up(self) -> None:
+        self.selected_index = (self.selected_index - 1) % len(MENU_ITEMS)
+        self.update_dashboard()
+
+    def action_cursor_down(self) -> None:
+        self.selected_index = (self.selected_index + 1) % len(MENU_ITEMS)
+        self.update_dashboard()
+
+    def action_select(self) -> None:
+        item = MENU_ITEMS[self.selected_index]
+        self.query_one("#message", Static).update(f"{item} module not built yet")
+
+    def _choose(self, index: int) -> None:
+        self.selected_index = index
+        self.action_select()
+        self.update_dashboard()
+
+    def action_choose_1(self) -> None:
+        self._choose(0)
+
+    def action_choose_2(self) -> None:
+        self._choose(1)
+
+    def action_choose_3(self) -> None:
+        self._choose(2)
+
+    def action_choose_4(self) -> None:
+        self._choose(3)
+
+    def action_choose_5(self) -> None:
+        self._choose(4)
+
+    def action_choose_6(self) -> None:
+        self._choose(5)
 
     def update_dashboard(self) -> None:
         state = get_system_state()
@@ -86,14 +148,12 @@ class AegisDashboard(App):
             f"Up   {state.uptime}"
         )
 
-        self.query_one("#menu", Static).update(
-            "[1] Knowledge\n"
-            "[2] Community\n"
-            "[3] Notes\n"
-            "[4] Network\n"
-            "[5] Hardware\n"
-            "[6] Settings"
-        )
+        lines = []
+        for i, item in enumerate(MENU_ITEMS):
+            prefix = ">" if i == self.selected_index else " "
+            lines.append(f"{prefix} {i + 1} {item}")
+
+        self.query_one("#menu", Static).update("\n".join(lines))
 
 
 def run_dashboard() -> None:
