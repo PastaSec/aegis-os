@@ -70,3 +70,41 @@ def read_document(path: Path) -> str:
         return path.read_text(errors="replace")
     except Exception as exc:
         return f"# Error\n\nCould not read document:\n\n{exc}"
+
+
+@dataclass
+class SearchResult:
+    pack_name: str
+    document_title: str
+    path: Path
+    line: int
+    preview: str
+
+
+def search_documents(query: str) -> list[SearchResult]:
+    query = query.strip().lower()
+    if not query:
+        return []
+
+    results = []
+    for pack in load_packs():
+        for doc in pack.documents:
+            try:
+                lines = doc.path.read_text(errors="replace").splitlines()
+            except Exception:
+                continue
+
+            for idx, line in enumerate(lines, start=1):
+                if query in line.lower():
+                    results.append(
+                        SearchResult(
+                            pack_name=pack.name,
+                            document_title=doc.title,
+                            path=doc.path,
+                            line=idx,
+                            preview=line.strip()[:80],
+                        )
+                    )
+                    break
+
+    return results
