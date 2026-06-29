@@ -1,0 +1,12 @@
+name: Florida
+id: florida
+version: 0.1.0
+icon: FL
+description: Florida emergency and resilience references.
+categories:
+  - Emergency
+  - Florida
+tags:
+  - hurricane
+  - flooding
+  - generator

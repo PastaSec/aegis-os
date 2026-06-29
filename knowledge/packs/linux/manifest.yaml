@@ -1,0 +1,11 @@
+name: Linux
+id: linux
+version: 0.1.0
+icon: LNX
+description: Linux and Raspberry Pi field references.
+categories:
+  - Technical
+tags:
+  - linux
+  - raspberry pi
+  - terminal

@@ -1,0 +1,11 @@
+name: Medical
+id: medical
+version: 0.1.0
+icon: MED
+description: Basic first aid and medical references.
+categories:
+  - Medical
+tags:
+  - first aid
+  - bleeding
+  - burns
