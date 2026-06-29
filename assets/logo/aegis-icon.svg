@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">AEGIS OS Icon</title>
+  <desc id="desc">Monochrome AEGIS OS emblem representing knowledge, communication, resilience, Florida coastal identity, and community.</desc>
+  <defs>
+    <style>
+      .bg{fill:#050505;}
+      .ink{fill:none;stroke:#f3ead7;stroke-width:34;stroke-linecap:round;stroke-linejoin:round;}
+      .ink2{fill:none;stroke:#f3ead7;stroke-width:24;stroke-linecap:round;stroke-linejoin:round;}
+      .fill{fill:#f3ead7;}
+      .text{fill:#f3ead7;font-family:Arial,Helvetica,sans-serif;font-weight:800;letter-spacing:14px;}
+      .small{fill:#f3ead7;font-family:Arial,Helvetica,sans-serif;font-weight:700;letter-spacing:5px;}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1024" height="1024" rx="96"/>
+
+  <!-- outer shield / community boundary -->
+  <path class="ink" d="M512 84 C693 84 840 160 890 286 C946 428 899 642 512 928 C125 642 78 428 134 286 C184 160 331 84 512 84 Z"/>
+
+  <!-- signal arcs: local, neighborhood, regional -->
+  <path class="ink2" d="M345 250 C391 207 452 183 512 183 C572 183 633 207 679 250"/>
+  <path class="ink2" d="M405 308 C435 281 474 266 512 266 C550 266 589 281 619 308"/>
+  <path class="ink2" d="M465 365 C478 353 495 347 512 347 C529 347 546 353 559 365"/>
+
+  <!-- central A / shelter / mast -->
+  <path class="ink" d="M262 706 L512 245 L762 706"/>
+  <path class="ink" d="M386 540 H638"/>
+  <path class="ink2" d="M512 245 V720"/>
+
+  <!-- open book: knowledge foundation -->
+  <path class="ink2" d="M308 726 C370 696 436 696 512 742 C588 696 654 696 716 726"/>
+  <path class="ink2" d="M308 726 V800 C374 774 440 778 512 822 C584 778 650 774 716 800 V726"/>
+  <path class="ink2" d="M512 742 V822"/>
+
+  <!-- Florida coastal horizon / water -->
+  <path class="ink2" d="M252 846 C300 828 348 864 396 846 C444 828 492 864 540 846 C588 828 636 864 684 846 C732 828 780 864 828 846"/>
+  <path class="ink2" d="M298 884 C346 866 394 902 442 884 C490 866 538 902 586 884 C634 866 682 902 730 884"/>
+
+  <!-- community nodes -->
+  <circle class="fill" cx="224" cy="444" r="28"/>
+  <circle class="fill" cx="800" cy="444" r="28"/>
+  <circle class="fill" cx="512" cy="145" r="18"/>
+  <path class="ink2" d="M224 486 C188 506 170 536 170 580"/>
+  <path class="ink2" d="M800 486 C836 506 854 536 854 580"/>
+
+  <!-- wordmark -->
+  <text class="text" x="512" y="978" text-anchor="middle" font-size="84">AEGIS</text>
+</svg>
