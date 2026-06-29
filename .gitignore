@@ -37,3 +37,7 @@ Thumbs.db
 # Build artifacts
 dist/
 build/
+
+# Python editable install artifacts
+*.egg-info/
+__pycache__/
