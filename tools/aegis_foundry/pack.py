@@ -23,7 +23,7 @@ class KnowledgePackPath:
     def documents(self) -> list[Path]:
         if not self.docs_dir.exists():
             return []
-        return sorted(self.docs_dir.glob("*.md"))
+        return sorted(self.docs_dir.rglob("*.md"))
 
     @property
     def display_name(self) -> str:
