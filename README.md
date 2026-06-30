@@ -74,6 +74,22 @@ The first AEGIS Console currently consists of:
 - SSH enabled
 - terminal console mapped to the PiTFT using systemd
 
+## Development architecture
+
+Sprint 001 organizes the terminal application into:
+
+- `aegis/core/` for routing, events, screen contracts, and shared application state
+- `aegis/screens/` for Capability screen rendering
+- `aegis/widgets/` for reusable terminal UI helpers
+- `aegis/themes/` for visual constants
+- `aegis/models/` for shared data shapes
+
+`aegis/dashboard.py` remains a compatibility shell exposing `run_dashboard()`.
+The `aegis` console command and appliance startup continue to enter through that stable surface.
+
+On Windows development systems, Raspberry Pi-specific Hardware fields may show `n/a`.
+Those fields depend on Pi tools and devices that are present on the appliance, not on a Windows workstation.
+
 ## Product model
 
 AEGIS is organized as three related systems.

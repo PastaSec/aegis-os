@@ -73,6 +73,11 @@ plugins/
 scripts/
 ```
 
+Current Sprint 001 implementation keeps `dashboard.py` as a compatibility shell.
+It exposes `run_dashboard()` for `aegis.app`, the console entrypoint, and appliance startup.
+Rendering is split into `screens/` and reusable terminal helpers in `widgets/`.
+Routing primitives live in `core/`, visual constants live in `themes/`, and shared data shapes belong in `models/`.
+
 ---
 
 # Core Layer
@@ -530,6 +535,9 @@ Pi hardware verification
 PiTFT verification
 
 SSH verification
+
+When developing on Windows, Pi-specific hardware checks may display `n/a`.
+This is expected for fields that depend on Raspberry Pi tools or devices, such as `vcgencmd` or `/dev/fb1`.
 
 ---
 

@@ -2,10 +2,19 @@ from textual.app import App, ComposeResult
 from textual.events import Key
 from textual.widgets import Static
 
-from aegis.inventory import categories as inventory_categories, items as inventory_items, read_item, title_from_item
-from aegis.journal import categories as journal_categories, entries as journal_entries, read_entry, title_from_entry
-from aegis.knowledge import load_packs, read_document
+from aegis.core.router import Router
+from aegis.inventory import categories as inventory_categories, items as inventory_items
+from aegis.journal import categories as journal_categories, entries as journal_entries
+from aegis.knowledge import load_packs
+from aegis.screens.hardware import render_hardware_screen
+from aegis.screens.inventory import render_inventory_category_screen, render_inventory_item_screen, render_inventory_screen
+from aegis.screens.journal import render_journal_category_screen, render_journal_entry_screen, render_journal_screen
+from aegis.screens.knowledge import render_document_screen, render_knowledge_screen, render_pack_screen
 from aegis.monitor import get_system_state
+from aegis.screens.home import render_home_screen
+from aegis.screens.placeholder import render_placeholder_screen
+from aegis.screens.search import render_search_input_screen, render_search_results_screen
+from aegis.screens.system import render_system_screen
 from aegis.search import search_all
 
 
@@ -39,9 +48,8 @@ class AegisDashboard(App):
 
     def __init__(self):
         super().__init__()
-        self.view = "home"
+        self.router = Router()
         self.selected = 0
-        self.stack = []
 
         self.packs = []
         self.journal_categories = []
@@ -58,6 +66,18 @@ class AegisDashboard(App):
 
         self.search_query = ""
         self.search_results = []
+
+    @property
+    def view(self) -> str:
+        return self.router.route_name
+
+    def navigate(self, view: str) -> None:
+        route = self.router.go(view, selected=0, current_selected=self.selected)
+        self.selected = route.selected
+
+    def replace_view(self, view: str) -> None:
+        route = self.router.replace(view, selected=0)
+        self.selected = route.selected
 
     def compose(self) -> ComposeResult:
         yield Static("", id="screen")
@@ -84,9 +104,7 @@ class AegisDashboard(App):
         self.draw()
 
     def action_search(self) -> None:
-        self.stack.append((self.view, self.selected))
-        self.view = "search_input"
-        self.selected = 0
+        self.navigate("search_input")
         self.search_query = ""
         self.draw()
 
@@ -98,8 +116,7 @@ class AegisDashboard(App):
 
         if event.key == "enter":
             self.search_results = search_all(self.search_query)
-            self.view = "search_results"
-            self.selected = 0
+            self.replace_view("search_results")
             self.draw()
             return
 
@@ -117,11 +134,8 @@ class AegisDashboard(App):
             self.draw()
 
     def action_back(self) -> None:
-        if self.stack:
-            self.view, self.selected = self.stack.pop()
-        else:
-            self.view = "home"
-            self.selected = 0
+        route = self.router.back()
+        self.selected = route.selected
         self.draw()
 
     def item_count(self) -> int:
@@ -161,69 +175,45 @@ class AegisDashboard(App):
         if self.view == "home":
             item = HOME_ITEMS[self.selected]
             if item == "Knowledge":
-                self.stack.append((self.view, self.selected))
-                self.view = "knowledge"
-                self.selected = 0
+                self.navigate("knowledge")
             elif item == "Field Journal":
-                self.stack.append((self.view, self.selected))
-                self.view = "journal"
-                self.selected = 0
+                self.navigate("journal")
             elif item == "Inventory":
-                self.stack.append((self.view, self.selected))
-                self.view = "inventory"
-                self.selected = 0
+                self.navigate("inventory")
             elif item == "Hardware":
-                self.stack.append((self.view, self.selected))
-                self.view = "hardware"
-                self.selected = 0
+                self.navigate("hardware")
             elif item == "System":
-                self.stack.append((self.view, self.selected))
-                self.view = "system"
-                self.selected = 0
+                self.navigate("system")
             else:
-                self.stack.append((self.view, self.selected))
-                self.view = "placeholder"
-                self.selected = 0
+                self.navigate("placeholder")
 
         elif self.view == "knowledge" and self.packs:
             self.current_pack = self.packs[self.selected]
-            self.stack.append((self.view, self.selected))
-            self.view = "pack"
-            self.selected = 0
+            self.navigate("pack")
 
         elif self.view == "pack" and self.current_pack and self.current_pack.documents:
             self.current_doc = self.current_pack.documents[self.selected]
-            self.stack.append((self.view, self.selected))
-            self.view = "document"
-            self.selected = 0
+            self.navigate("document")
 
         elif self.view == "journal" and self.journal_categories:
             self.current_journal_category = self.journal_categories[self.selected]
-            self.stack.append((self.view, self.selected))
-            self.view = "journal_category"
-            self.selected = 0
+            self.navigate("journal_category")
 
         elif self.view == "journal_category":
             entries = journal_entries(self.current_journal_category)
             if entries:
                 self.current_journal_entry = entries[self.selected]
-                self.stack.append((self.view, self.selected))
-                self.view = "journal_entry"
-                self.selected = 0
+                self.navigate("journal_entry")
 
         elif self.view == "inventory" and self.inventory_categories:
             self.current_inventory_category = self.inventory_categories[self.selected]
-            self.stack.append((self.view, self.selected))
-            self.view = "inventory_category"
-            self.selected = 0
+            self.navigate("inventory_category")
 
         elif self.view == "inventory_category":
             items = inventory_items(self.current_inventory_category)
             if items:
                 self.current_inventory_item = items[self.selected]
-                self.stack.append((self.view, self.selected))
-                self.view = "inventory_item"
-                self.selected = 0
+                self.navigate("inventory_item")
 
         elif self.view == "search_results" and self.search_results:
             result = self.search_results[self.selected]
@@ -232,120 +222,57 @@ class AegisDashboard(App):
                 "path": result.path,
             })()
             self.current_pack = None
-            self.stack.append((self.view, self.selected))
-            self.view = "document"
-            self.selected = 0
+            self.navigate("document")
 
         self.draw()
-
-    def menu(self, items: list[str]) -> str:
-        if not items:
-            return "  None found"
-
-        lines = []
-        for i, item in enumerate(items[:8]):
-            pointer = ">" if i == self.selected else " "
-            lines.append(f"{pointer} {item}")
-        return "\n".join(lines)
-
-    def frame(self, title: str, status: str, body: str, footer: str = "↑↓ Select  Enter Open  Esc Back  Q Quit") -> str:
-        return (
-            f"[bold cyan]{title}[/bold cyan]\n"
-            f"{status}\n"
-            f"------------------------------\n"
-            f"{body}\n"
-            f"------------------------------\n"
-            f"[dim]{footer}[/dim]"
-        )
 
     def draw(self) -> None:
         if self.view == "home":
             state = get_system_state()
-            body = (
-                f"Mission Ready\n"
-                f"{state.ip}\n\n"
-                f"{self.menu(HOME_ITEMS)}"
-            )
-            self.write(self.frame("AEGIS OS", f"[bold green]STATUS {state.readiness}[/bold green]", body, "↑↓ Select  Enter Open  / Search  Q Quit"))
+            self.write(render_home_screen(state, HOME_ITEMS, self.selected))
 
         elif self.view == "knowledge":
-            items = [f"{pack.icon} {pack.name}".strip() for pack in self.packs]
-            self.write(self.frame("Knowledge", f"Packs: {len(items)}", self.menu(items)))
+            self.write(render_knowledge_screen(self.packs, self.selected))
 
         elif self.view == "pack":
-            docs = self.current_pack.documents if self.current_pack else []
-            items = [doc.title for doc in docs]
-            title = self.current_pack.name if self.current_pack else "Pack"
-            self.write(self.frame(title, "Documents", self.menu(items)))
+            self.write(render_pack_screen(self.current_pack, self.selected))
 
         elif self.view == "document":
-            title = self.current_doc.title if self.current_doc else "Document"
-            text = read_document(self.current_doc.path) if self.current_doc else "No document selected"
-            preview = "\n".join(text.splitlines()[:13])
-            self.write(self.frame(title, "Viewer", preview))
+            self.write(render_document_screen(self.current_doc))
 
         elif self.view == "journal":
-            items = [category.title() for category in self.journal_categories]
-            self.write(self.frame("Field Journal", f"Categories: {len(items)}", self.menu(items)))
+            self.write(render_journal_screen(self.journal_categories, self.selected))
 
         elif self.view == "journal_category":
-            entries = journal_entries(self.current_journal_category)
-            items = [title_from_entry(entry) for entry in entries]
-            self.write(self.frame(self.current_journal_category.title(), f"Entries: {len(items)}", self.menu(items)))
+            self.write(render_journal_category_screen(self.current_journal_category, self.selected))
 
         elif self.view == "journal_entry":
-            title = title_from_entry(self.current_journal_entry)
-            preview = "\n".join(read_entry(self.current_journal_entry).splitlines()[:13])
-            self.write(self.frame(title, "Field Journal", preview))
+            self.write(render_journal_entry_screen(self.current_journal_entry))
 
         elif self.view == "inventory":
-            items = [category.title() for category in self.inventory_categories]
-            self.write(self.frame("Inventory", f"Categories: {len(items)}", self.menu(items)))
+            self.write(render_inventory_screen(self.inventory_categories, self.selected))
 
         elif self.view == "inventory_category":
-            items = inventory_items(self.current_inventory_category)
-            names = [title_from_item(item) for item in items]
-            self.write(self.frame(self.current_inventory_category.title(), f"Items: {len(names)}", self.menu(names)))
+            self.write(render_inventory_category_screen(self.current_inventory_category, self.selected))
 
         elif self.view == "inventory_item":
-            title = title_from_item(self.current_inventory_item)
-            preview = "\n".join(read_item(self.current_inventory_item).splitlines()[:13])
-            self.write(self.frame(title, "Inventory", preview))
+            self.write(render_inventory_item_screen(self.current_inventory_item))
 
         elif self.view == "search_input":
-            body = f"/ {self.search_query}_"
-            self.write(self.frame("Search", "Universal Search", body, "Type query  Enter Search  Esc Cancel"))
+            self.write(render_search_input_screen(self.search_query))
 
         elif self.view == "search_results":
-            items = [f"{result.pack_name}: {result.document_title}" for result in self.search_results[:8]]
-            self.write(self.frame("Search Results", f"Results: {len(self.search_results)}", self.menu(items)))
+            self.write(render_search_results_screen(self.search_results, self.selected))
 
         elif self.view == "hardware":
             state = get_system_state()
-            body = (
-                f"Host    {state.host}\n"
-                f"IP      {state.ip}\n"
-                f"CPU     {state.cpu}\n"
-                f"RAM     {state.memory}\n"
-                f"Disk    {state.disk}\n"
-                f"Temp    {state.temp}\n"
-                f"Power   {state.power}\n"
-                f"Uptime  {state.uptime}"
-            )
-            self.write(self.frame("Hardware", "System Diagnostics", body))
+            self.write(render_hardware_screen(state))
 
         elif self.view == "system":
-            body = (
-                "AEGIS OS v0.1.0-alpha\n"
-                "Mode: Field Terminal\n\n"
-                "Update, backup, restore,\n"
-                "logs, and configuration\n"
-                "will live here."
-            )
-            self.write(self.frame("System", "Maintenance", body))
+            self.write(render_system_screen())
 
         elif self.view == "placeholder":
-            self.write(self.frame("AEGIS OS", "Not Built Yet", "This module is reserved for Alpha expansion."))
+            self.write(render_placeholder_screen())
 
 
 def run_dashboard() -> None:
