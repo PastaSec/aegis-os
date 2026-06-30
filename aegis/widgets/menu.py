@@ -1,4 +1,5 @@
 from aegis.themes.field import FIELD_THEME, FieldTheme
+from aegis.widgets.listbox import render_listbox
 
 
 def render_menu(
@@ -8,11 +9,4 @@ def render_menu(
     *,
     theme: FieldTheme = FIELD_THEME,
 ) -> str:
-    if not items:
-        return theme.empty_menu
-
-    lines = []
-    for index, item in enumerate(items[:limit]):
-        pointer = theme.selection(index == selected)
-        lines.append(f"{pointer} {item}")
-    return "\n".join(lines)
+    return render_listbox(items, selected, limit, theme=theme)

@@ -14,7 +14,7 @@ y = 4
 canvas.paste(logo, (x, y))
 
 draw = ImageDraw.Draw(canvas)
-text = "AEGIS OS v0.1.0-alpha"
+text = "AEGIS OS v0.3.0-alpha"
 try:
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
 except Exception:

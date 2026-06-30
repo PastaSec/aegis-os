@@ -16,7 +16,7 @@ clear
 
 echo "================================"
 echo "            AEGIS OS"
-echo "        v0.1.0-alpha"
+echo "        v0.3.0-alpha"
 echo "================================"
 echo
 echo "Loading Knowledge..."
