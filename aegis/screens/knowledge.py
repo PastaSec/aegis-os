@@ -9,6 +9,9 @@ from aegis.widgets.markdown import render_markdown_lines
 from aegis.widgets.viewer import render_document_view
 
 
+DOCUMENT_FOOTER = "↑↓ Scroll  PgUp/PgDn Page  Home/End Jump  F Favorite  Esc Back  Q Quit"
+
+
 class DocumentLike(Protocol):
     title: str
     path: Path
@@ -60,7 +63,7 @@ def render_document_screen(
     if metadata:
         text = "\n".join(metadata) + "\n\n" + text
     body, status, _ = render_document_view(text, offset, height)
-    return render_frame(title, status, body)
+    return render_frame(title, status, body, DOCUMENT_FOOTER)
 
 
 def document_line_count(document: DocumentLike | None) -> int:

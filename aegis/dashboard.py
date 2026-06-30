@@ -5,21 +5,41 @@ from textual.widgets import Static
 from aegis.core.router import Router
 from aegis.inventory import categories as inventory_categories, items as inventory_items
 from aegis.journal import categories as journal_categories, entries as journal_entries
-from aegis.knowledge import load_packs
+from aegis.knowledge import load_document, load_packs
 from aegis.models.document_viewer import DocumentViewState
+from aegis.operator import (
+    get_position,
+    load_operator_state,
+    record_recent,
+    resolve_document_refs,
+    save_operator_state,
+    set_position,
+    toggle_favorite,
+)
 from aegis.screens.hardware import render_hardware_screen
 from aegis.screens.inventory import render_inventory_category_screen, render_inventory_item_screen, render_inventory_screen
 from aegis.screens.journal import render_journal_category_screen, render_journal_entry_screen, render_journal_screen
 from aegis.screens.knowledge import document_line_count, render_document_screen, render_knowledge_screen, render_pack_screen
 from aegis.monitor import get_system_state
 from aegis.screens.home import render_home_screen
+from aegis.screens.operator import render_operator_documents_screen
 from aegis.screens.placeholder import render_placeholder_screen
 from aegis.screens.search import render_search_input_screen, render_search_results_screen
 from aegis.screens.system import render_system_screen
 from aegis.search import search_all
 
 
-HOME_ITEMS = ["Knowledge", "Field Journal", "Inventory", "Communications", "Navigation", "Hardware", "System"]
+HOME_ITEMS = [
+    "Knowledge",
+    "Recent Documents",
+    "Favorites",
+    "Field Journal",
+    "Inventory",
+    "Communications",
+    "Navigation",
+    "Hardware",
+    "System",
+]
 
 
 class AegisDashboard(App):
@@ -59,6 +79,9 @@ class AegisDashboard(App):
         self.packs = []
         self.journal_categories = []
         self.inventory_categories = []
+        self.operator_state = load_operator_state()
+        self.recent_documents = []
+        self.favorite_documents = []
 
         self.current_pack = None
         self.current_doc = None
@@ -101,6 +124,16 @@ class AegisDashboard(App):
         self.packs = load_packs()
         self.journal_categories = journal_categories()
         self.inventory_categories = inventory_categories()
+        self.operator_state = load_operator_state()
+        self.refresh_operator_documents()
+
+    def refresh_operator_documents(self) -> None:
+        self.recent_documents = resolve_document_refs(self.operator_state.recent)
+        self.favorite_documents = resolve_document_refs(self.operator_state.favorites)
+
+    def save_operator_state(self) -> None:
+        save_operator_state(self.operator_state)
+        self.refresh_operator_documents()
 
     def write(self, text: str) -> None:
         self.query_one("#screen", Static).update(text)
@@ -115,6 +148,11 @@ class AegisDashboard(App):
         self.draw()
 
     def on_key(self, event: Key) -> None:
+        if self.view == "document" and event.key.lower() == "f":
+            event.stop()
+            self.action_toggle_favorite()
+            return
+
         if self.view != "search_input":
             return
 
@@ -140,6 +178,8 @@ class AegisDashboard(App):
             self.draw()
 
     def action_back(self) -> None:
+        if self.view == "document":
+            self.save_document_position()
         route = self.router.back()
         self.selected = route.selected
         self.draw()
@@ -149,7 +189,21 @@ class AegisDashboard(App):
 
     def scroll_document(self, amount: int) -> None:
         self.document_view.scroll(amount, self.document_total_lines())
+        self.save_document_position()
         self.draw()
+
+    def save_document_position(self) -> None:
+        if self.current_doc:
+            set_position(self.operator_state, self.current_doc, self.document_view.offset)
+            self.save_operator_state()
+
+    def open_document(self, document) -> None:
+        self.current_doc = document
+        self.document_view.offset = get_position(self.operator_state, document)
+        self.document_view.scroll(0, self.document_total_lines())
+        record_recent(self.operator_state, document)
+        self.save_operator_state()
+        self.navigate("document")
 
     def item_count(self) -> int:
         if self.view == "home":
@@ -158,6 +212,10 @@ class AegisDashboard(App):
             return len(self.packs)
         if self.view == "pack" and self.current_pack:
             return len(self.current_pack.documents)
+        if self.view == "recent_documents":
+            return len(self.recent_documents)
+        if self.view == "favorites":
+            return len(self.favorite_documents)
         if self.view == "journal":
             return len(self.journal_categories)
         if self.view == "journal_category" and self.current_journal_category:
@@ -195,28 +253,44 @@ class AegisDashboard(App):
     def action_page_up(self) -> None:
         if self.view == "document":
             self.document_view.page_up(self.document_total_lines())
+            self.save_document_position()
             self.draw()
 
     def action_page_down(self) -> None:
         if self.view == "document":
             self.document_view.page_down(self.document_total_lines())
+            self.save_document_position()
             self.draw()
 
     def action_document_home(self) -> None:
         if self.view == "document":
             self.document_view.home()
+            self.save_document_position()
             self.draw()
 
     def action_document_end(self) -> None:
         if self.view == "document":
             self.document_view.end(self.document_total_lines())
+            self.save_document_position()
             self.draw()
+
+    def action_toggle_favorite(self) -> None:
+        if self.view != "document" or not self.current_doc:
+            return
+
+        toggle_favorite(self.operator_state, self.current_doc)
+        self.save_operator_state()
+        self.draw()
 
     def action_select(self) -> None:
         if self.view == "home":
             item = HOME_ITEMS[self.selected]
             if item == "Knowledge":
                 self.navigate("knowledge")
+            elif item == "Recent Documents":
+                self.navigate("recent_documents")
+            elif item == "Favorites":
+                self.navigate("favorites")
             elif item == "Field Journal":
                 self.navigate("journal")
             elif item == "Inventory":
@@ -233,9 +307,13 @@ class AegisDashboard(App):
             self.navigate("pack")
 
         elif self.view == "pack" and self.current_pack and self.current_pack.documents:
-            self.current_doc = self.current_pack.documents[self.selected]
-            self.document_view.reset()
-            self.navigate("document")
+            self.open_document(self.current_pack.documents[self.selected])
+
+        elif self.view == "recent_documents" and self.recent_documents:
+            self.open_document(self.recent_documents[self.selected])
+
+        elif self.view == "favorites" and self.favorite_documents:
+            self.open_document(self.favorite_documents[self.selected])
 
         elif self.view == "journal" and self.journal_categories:
             self.current_journal_category = self.journal_categories[self.selected]
@@ -259,13 +337,10 @@ class AegisDashboard(App):
 
         elif self.view == "search_results" and self.search_results:
             result = self.search_results[self.selected]
-            self.current_doc = type("SearchDoc", (), {
-                "title": result.document_title,
-                "path": result.path,
-            })()
+            source = result.pack_name.split("/", 1)[1] if "/" in result.pack_name else result.pack_name
+            self.current_doc = load_document(result.path, source)
             self.current_pack = None
-            self.document_view.reset()
-            self.navigate("document")
+            self.open_document(self.current_doc)
 
         self.draw()
 
@@ -279,6 +354,12 @@ class AegisDashboard(App):
 
         elif self.view == "pack":
             self.write(render_pack_screen(self.current_pack, self.selected))
+
+        elif self.view == "recent_documents":
+            self.write(render_operator_documents_screen("Recent Documents", self.recent_documents, self.selected))
+
+        elif self.view == "favorites":
+            self.write(render_operator_documents_screen("Favorites", self.favorite_documents, self.selected))
 
         elif self.view == "document":
             self.write(render_document_screen(self.current_doc, self.document_view.offset, self.document_view.height))
