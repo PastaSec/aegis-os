@@ -12,6 +12,29 @@ from aegis.widgets.viewer import render_document_view
 class DocumentLike(Protocol):
     title: str
     path: Path
+    tags: list[str]
+    author: str
+    revision: str
+    summary: str
+
+
+def metadata_lines(document: DocumentLike | None) -> list[str]:
+    if not document:
+        return []
+
+    lines = []
+    if getattr(document, "author", ""):
+        lines.append(document.author)
+    if getattr(document, "revision", ""):
+        lines.append(f"Revision {document.revision}")
+    if getattr(document, "summary", ""):
+        lines.append(document.summary)
+    tags = getattr(document, "tags", [])
+    if tags:
+        lines.append("Tags: " + " ".join(tags))
+    if lines:
+        lines.append("------------------------------")
+    return lines
 
 
 def render_knowledge_screen(packs: list[KnowledgePack], selected: int) -> str:
@@ -33,10 +56,16 @@ def render_document_screen(
 ) -> str:
     title = document.title if document else "Document"
     text = read_document(document.path) if document else "No document selected"
+    metadata = metadata_lines(document)
+    if metadata:
+        text = "\n".join(metadata) + "\n\n" + text
     body, status, _ = render_document_view(text, offset, height)
     return render_frame(title, status, body)
 
 
 def document_line_count(document: DocumentLike | None) -> int:
     text = read_document(document.path) if document else "No document selected"
+    metadata = metadata_lines(document)
+    if metadata:
+        text = "\n".join(metadata) + "\n\n" + text
     return len(render_markdown_lines(text))

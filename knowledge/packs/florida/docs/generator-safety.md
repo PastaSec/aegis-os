@@ -1,3 +1,15 @@
+---
+title: Generator Safety
+category: Power
+tags:
+  - generator
+  - fuel
+  - hurricane
+author: AEGIS
+revision: 2026
+summary: Safe generator operation during outages.
+---
+
 # Generator Safety
 
 - Never run a generator indoors.
