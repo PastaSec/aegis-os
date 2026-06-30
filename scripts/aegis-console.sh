@@ -3,6 +3,7 @@ set -euo pipefail
 
 cd /home/ianlwterry/cyberdeck/aegis-os
 /usr/bin/con2fbmap 1 1 2>/dev/null || true
+/usr/bin/setfont /usr/share/consolefonts/Lat7-Terminus12x6.psf.gz 2>/dev/null || true
 
 clear
 python scripts/clear_fb.py 2>/tmp/aegis-clear.log || true
