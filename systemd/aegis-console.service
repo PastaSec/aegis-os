@@ -1,0 +1,22 @@
+[Unit]
+Description=AEGIS OS Console
+After=multi-user.target pitft-console.service
+Wants=pitft-console.service
+
+[Service]
+Type=simple
+User=ianlwterry
+WorkingDirectory=/home/ianlwterry/cyberdeck/aegis-os
+ExecStart=/bin/bash -lc '/home/ianlwterry/cyberdeck/aegis-os/scripts/aegis-console.sh'
+StandardInput=tty-force
+StandardOutput=tty
+StandardError=journal
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+Environment=TERM=xterm-256color
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
