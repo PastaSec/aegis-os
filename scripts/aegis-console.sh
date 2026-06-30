@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd /home/ianlwterry/cyberdeck/aegis-os
+AEGIS_VERSION="$(cat VERSION 2>/dev/null || printf 'unknown')"
 /usr/bin/con2fbmap 1 1 2>/dev/null || true
 /usr/bin/setfont /usr/share/consolefonts/Lat7-Terminus12x6.psf.gz 2>/dev/null || true
 
@@ -16,7 +17,7 @@ clear
 
 echo "================================"
 echo "            AEGIS OS"
-echo "        v0.3.0-alpha"
+echo "        ${AEGIS_VERSION}"
 echo "================================"
 echo
 echo "Loading Knowledge..."
