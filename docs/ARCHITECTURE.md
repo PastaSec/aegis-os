@@ -18,7 +18,25 @@ The Project Brief describes **why**.
 
 # High-Level Architecture
 
-AEGIS is organized into six primary layers.
+AEGIS is organized as a three-part ecosystem.
+
+```
+AEGIS Foundry
+    prepares and validates
+        Knowledge Packs
+            consumed by
+                AEGIS Runtime
+```
+
+AEGIS Runtime is the Raspberry Pi field terminal. It is offline-first, PiTFT-readable, and focused on fast field operation.
+
+AEGIS Foundry is desktop-side tooling for ingestion, extraction, metadata generation, pack building, and validation.
+
+Knowledge Packs are portable, plain-file based, metadata-enabled, versioned, and validated before deployment.
+
+Runtime must not perform heavy PDF, OCR, DOCX, AI ingestion, or large import work. Those responsibilities belong to Foundry.
+
+Within AEGIS Runtime, the application is organized into six primary layers.
 
 ```
              AEGIS OS
@@ -71,6 +89,8 @@ tests/
 plugins/
 
 scripts/
+
+foundry/
 ```
 
 Current Sprint 001 implementation keeps `dashboard.py` as a compatibility shell.
@@ -121,23 +141,23 @@ Example:
 ```
 Home
 
-↓
+then
 
 Knowledge
 
-↓
+then
 
 Document
 
-↓
+then
 
 Back
 
-↓
+then
 
 Knowledge
 
-↓
+then
 
 Home
 ```
@@ -309,7 +329,11 @@ Models should be plain Python objects or dataclasses.
 
 # Knowledge System
 
-Knowledge Packs are independent.
+Knowledge Packs are independent and are consumed by AEGIS Runtime.
+
+Knowledge Packs should be prepared by AEGIS Foundry before deployment.
+
+Runtime reads validated packs. It does not perform heavyweight ingestion work.
 
 ```
 knowledge/
@@ -333,6 +357,12 @@ documents
 
 optional assets
 
+metadata
+
+version information
+
+validation results
+
 Future support:
 
 images
@@ -342,6 +372,22 @@ pdf
 zim
 
 sqlite indexes
+
+Foundry responsibilities:
+
+- import PDFs, TXT, Markdown, and later DOCX files
+- extract text
+- generate metadata
+- build pack manifests
+- validate Knowledge Packs
+- optionally use AI during ingestion
+
+Runtime responsibilities:
+
+- load validated Knowledge Packs
+- display documents
+- search local pack content and metadata
+- remain fully offline in field use
 
 ---
 
@@ -433,27 +479,27 @@ Desired startup:
 ```
 Power
 
-↓
+then
 
 Linux Boot
 
-↓
+then
 
 Splash
 
-↓
+then
 
 Initialization
 
-↓
+then
 
 Capability Loading
 
-↓
+then
 
 Mission Ready
 
-↓
+then
 
 Home Screen
 ```

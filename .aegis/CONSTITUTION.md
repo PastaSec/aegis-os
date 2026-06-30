@@ -17,6 +17,36 @@ Preserve knowledge.
 Strengthen communities.
 Remain operational.
 
+## Three-Part Ecosystem
+
+AEGIS is an ecosystem with three clear responsibilities.
+
+### AEGIS Runtime
+
+AEGIS Runtime is the Raspberry Pi field terminal.
+
+It is offline-first, keyboard-first, and PiTFT-readable.
+
+It consumes validated Knowledge Packs.
+
+It does not perform heavy PDF, OCR, import, or document conversion work in the field.
+
+### AEGIS Foundry
+
+AEGIS Foundry is desktop-side tooling.
+
+It prepares Knowledge Packs before deployment.
+
+It may import PDFs, TXT, Markdown, and later DOCX files.
+
+It may extract text, generate metadata, validate packs, and use AI during ingestion.
+
+AI-assisted ingestion belongs in Foundry. The Runtime remains offline and dependable.
+
+### Knowledge Packs
+
+Knowledge Packs are portable, plain-file based, metadata-enabled, versioned, and validated before deployment.
+
 ## Product Principles
 
 - Offline First
@@ -112,6 +142,8 @@ Do not remove Knowledge, Journal, Inventory, Search, Hardware, or appliance star
 Do not expose Python tracebacks to the operator.
 
 Do not introduce cloud dependency.
+
+Do not move heavy ingestion, PDF processing, OCR, or import pipelines into AEGIS Runtime.
 
 Do not add GPS, maps, Meshtastic, weather, bookmarks, favorites, or recent documents during Sprint 001.
 

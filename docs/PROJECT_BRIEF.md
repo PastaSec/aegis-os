@@ -81,6 +81,44 @@ Core Values:
 
 ---
 
+# AEGIS Ecosystem
+
+AEGIS OS is organized as a three-part ecosystem.
+
+## AEGIS Runtime
+
+AEGIS Runtime is the Raspberry Pi field terminal.
+
+It is offline-first, keyboard-first, high contrast, and designed for PiTFT readability.
+
+Runtime consumes validated Knowledge Packs and presents them to the operator in the field.
+
+Runtime does not perform heavy PDF import, OCR, DOCX conversion, AI ingestion, or large document-processing jobs.
+
+Those tasks belong before deployment.
+
+## AEGIS Foundry
+
+AEGIS Foundry is desktop-side tooling for preparing Knowledge Packs.
+
+Foundry imports source material such as PDFs, TXT, Markdown, and later DOCX files.
+
+Foundry extracts text, generates metadata, builds pack manifests, validates pack structure, and produces portable Knowledge Packs for Runtime.
+
+Foundry may use AI during ingestion to classify, summarize, tag, or normalize documents.
+
+AI-assisted ingestion never makes Runtime cloud-dependent. Runtime remains offline-first.
+
+## Knowledge Packs
+
+Knowledge Packs are portable collections of plain files.
+
+They are metadata-enabled, versioned, and validated before deployment to Runtime.
+
+Knowledge Packs should remain readable and useful even without AEGIS software.
+
+---
+
 # Design Philosophy
 
 AEGIS is an appliance.

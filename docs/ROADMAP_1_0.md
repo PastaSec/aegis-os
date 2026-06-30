@@ -37,6 +37,36 @@ Every release should be:
 
 ---
 
+# Ecosystem Tracks
+
+AEGIS OS development is organized across three tracks.
+
+## AEGIS Runtime
+
+The Raspberry Pi field terminal.
+
+Runtime stays offline-first, fast, readable, keyboard-first, and PiTFT-compatible.
+
+Runtime consumes validated Knowledge Packs and does not perform heavy PDF, OCR, DOCX, AI ingestion, or bulk import work.
+
+## AEGIS Foundry
+
+Desktop-side tooling for preparing Knowledge Packs.
+
+Foundry imports PDFs, TXT, Markdown, and later DOCX files.
+
+Foundry extracts text, generates metadata, builds manifests, validates packs, and may use AI during ingestion.
+
+Foundry output must be usable by Runtime without Internet access.
+
+## Knowledge Packs
+
+Portable, plain-file based, metadata-enabled, versioned, and validated content packages.
+
+Knowledge Packs are the handoff between Foundry and Runtime.
+
+---
+
 # v0.2.0-alpha
 ## Architecture Foundation
 
@@ -68,20 +98,20 @@ Deliverables:
 
 Acceptance Criteria:
 
-✓ Existing functionality preserved
+[x] Existing functionality preserved
 
-✓ Pi boots
+[x] Pi boots
 
-✓ PiTFT verified
+[x] PiTFT verified
 
-✓ Architecture documented
+[x] Architecture documented
 
-✓ Dashboard modularized
+[x] Dashboard modularized
 
 ---
 
 # v0.3.0-beta
-## Knowledge Engine
+## Knowledge Engine and Pack Metadata
 
 Objective
 
@@ -111,7 +141,13 @@ Image support
 
 Knowledge Pack Manifest
 
+Knowledge Pack metadata
+
+Knowledge Pack validation
+
 Search improvements
+
+Runtime consumption of validated packs
 
 Future
 
@@ -121,9 +157,52 @@ Offline Wikipedia
 
 Offline manuals
 
+Foundry import pipeline
+
 Acceptance Criteria
 
 Knowledge becomes the primary capability.
+
+Runtime continues to consume plain-file Knowledge Packs without requiring heavy ingestion work.
+
+---
+
+# v0.3.x-alpha
+## AEGIS Foundry Foundation
+
+Objective
+
+Create desktop-side tooling for building and validating Knowledge Packs.
+
+Features
+
+Markdown import
+
+TXT import
+
+PDF text extraction
+
+Metadata generation
+
+Pack manifest generation
+
+Pack validation
+
+Local AI-assisted ingestion as optional tooling
+
+Future
+
+DOCX import
+
+OCR
+
+Batch normalization
+
+Acceptance Criteria
+
+Foundry produces portable, validated Knowledge Packs.
+
+Runtime remains offline-first and does not perform heavy import work.
 
 ---
 
