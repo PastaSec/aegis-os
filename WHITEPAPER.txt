@@ -1,826 +1,165 @@
 AEGIS OS WHITEPAPER
-Version: 0.1
-Repository: PastaSec/aegis-os
-Project name: AEGIS OS
-Full name: Autonomous Emergency & General Information System
+Version 0.2 Draft
+Project: PastaSec/aegis-os
 
-======================================================================
-ABSTRACT
-======================================================================
+Title:
+AEGIS OS — Offline-First Field Terminal for Local Resilience
 
-AEGIS OS is an offline-first community resilience platform designed to preserve knowledge, maintain local communication, and support small-community coordination when normal infrastructure is unreliable or unavailable.
+Mission:
+AEGIS OS exists to help individuals and neighborhoods remain informed, connected, and capable every day, and especially when normal infrastructure is unavailable.
 
-The first reference implementation is a Raspberry Pi 3 Model B cyberdeck equipped with an Adafruit 2.8 inch PiTFT resistive touchscreen. This device, called the AEGIS Console, is not the full system. It is the operator interface for a broader platform that may include a local web portal, offline document library, community bulletin board, portable receiver nodes, ESP32 sensor nodes, OpenWrt routers, and dockable USB instruments such as the Flipper Zero.
+Executive Summary:
+AEGIS OS is an offline-first operating environment designed for Raspberry Pi-based field terminals. It combines local knowledge storage, field journaling, inventory tracking, hardware monitoring, and future communications tools into a single appliance-style interface.
 
-The project is built around three core principles:
+AEGIS is not intended to be a general-purpose Linux desktop. It is designed to feel like dedicated equipment: simple, readable, reliable, and useful under stress.
 
-Knowledge. Communication. Resilience.
+Core Principle:
+If the Internet disappeared tomorrow, AEGIS should become more valuable, not less.
 
-AEGIS OS is intended for practical local use: a household, a block, or a small neighborhood. Its purpose is not to replace emergency services, public safety infrastructure, commercial networking, or the Internet. Its purpose is to provide a local fallback when those systems are delayed, degraded, overloaded, or absent.
+System Identity:
+AEGIS stands for:
 
-If everything goes sideways, Ian and his neighbors should still have a place to connect, communicate, learn, coordinate, and share resources.
+Autonomous Emergency & General Information System
 
-======================================================================
-1. PROJECT IDENTITY
-======================================================================
+Its core values are:
 
-1.1 Name
+Knowledge.
+Communication.
+Resilience.
 
-AEGIS OS stands for Autonomous Emergency & General Information System.
+Stronger Together. Prepared Together.
 
-The word "aegis" historically refers to a shield or protective covering. This project adopts that meaning deliberately. AEGIS is not a weapon. It is not a fear-driven project. It is a protective system based on knowledge, communication, preparation, and community coordination.
+Design Philosophy:
+AEGIS OS is built around five rules:
 
-1.2 Repository
+1. Offline First
+Critical functionality must not depend on Internet access.
 
-The official repository name is:
+2. Three Keystrokes Maximum
+Important information should be reachable quickly.
 
-PastaSec/aegis-os
+3. No Linux Exposure
+The operator should not need to understand Python, virtual environments, YAML, Markdown, systemd, or Linux internals during normal use.
 
-The name "aegis-os" was chosen because the project is broader than a single Raspberry Pi build. The Raspberry Pi cyberdeck is the first hardware target. The larger project is a portable operating platform that can evolve across devices.
+4. Everything Searchable
+Knowledge, journal entries, inventory, hardware status, and future communications should all be discoverable through one search interface.
 
-1.3 Motto
+5. Consistent Navigation
+Every screen should use the same interaction model:
+Up/Down to move, Enter to open, Esc to return, / to search, R to refresh, Q to standby.
 
-Knowledge. Communication. Resilience.
+Current Capabilities:
+The current alpha build includes:
 
-These are the three filters used to evaluate every proposed feature.
+- AEGIS logo boot splash
+- Appliance-style loading sequence
+- PiTFT-optimized interface
+- Mission dashboard
+- Knowledge pack browser
+- Markdown document viewer
+- Field Journal foundation
+- Inventory foundation
+- Universal search foundation
+- GitHub-backed source control
+- Plain-file data architecture
 
-A feature belongs in AEGIS if it improves at least one of the following:
+Field Terminal Direction:
+Version 0.2 moves AEGIS from a prototype dashboard into a field terminal.
 
-- access to useful knowledge
-- communication between people
-- coordination of community resources
-- operational awareness
-- resilience during degraded infrastructure
+The home screen will focus on mission areas:
 
-A feature does not belong if it exists only because it is interesting, flashy, or technically possible.
+- Knowledge
+- Journal
+- Inventory
+- Communications
+- Navigation
+- Hardware
+- System
 
-======================================================================
-2. MISSION
-======================================================================
+Technical diagnostics such as CPU, memory, storage, temperature, and power status will move into Hardware. Configuration, logs, updates, backup, restore, and about information will move into System.
 
-AEGIS OS exists to help a small community remain informed, connected, and capable when normal infrastructure becomes unreliable.
+Knowledge Architecture:
+AEGIS uses Knowledge Packs rather than hardcoded content.
 
-The mission is:
+A Knowledge Pack is a portable offline information bundle containing a manifest and human-readable documents. Packs may include Markdown, text, PDF, HTML, images, and future formats such as ZIM archives.
 
-Build a self-contained community operations platform capable of monitoring, communicating, documenting, educating, and coordinating a small community without relying on external infrastructure.
+This allows communities to create and share localized packs such as:
 
-This means AEGIS must be useful when:
+- Florida Hurricane Pack
+- CERT Pack
+- First Aid Pack
+- Ham Radio Pack
+- Linux Field Reference
+- Generator Safety Pack
+- Community Resource Pack
 
-- Internet connectivity is unavailable
-- cellular networks are overloaded or down
-- power is intermittent
-- local information is scattered
-- people need to coordinate help, supplies, or status updates
-- trusted knowledge must be available offline
-- normal communication channels are unreliable
+Plain-File Architecture:
+AEGIS intentionally stores core data as ordinary files.
 
-AEGIS is not designed around a single disaster scenario. It is designed around general degradation: hurricanes, power outages, network outages, local emergencies, evacuations, supply disruptions, or any situation where neighbors need a local coordination point.
+Knowledge lives in:
 
-======================================================================
-3. DESIGN PHILOSOPHY
-======================================================================
+knowledge/packs/
 
-3.1 Offline First
+Journal entries live in:
 
-AEGIS must not depend on the cloud for core operation.
+journal/
 
-Cloud services may enhance the system when available, but the central functions must remain local:
+Inventory lives in:
 
-- offline documents
-- local search
-- local web portal
-- local notes
-- local logs
-- local authentication
-- local service status
-- local message board
+inventory/
 
-Internet access is treated as a bonus, not a requirement.
+This makes the system portable, inspectable, editable, backup-friendly, and resilient. The data remains useful even without the AEGIS application.
 
-3.2 Community First
+Future Communications:
+AEGIS is designed to support communications modules such as:
 
-AEGIS is not only an operator tool. It is a community tool.
+- Meshtastic
+- LoRa
+- APRS
+- NOAA weather radio references
+- GMRS/FRS references
+- Amateur radio frequencies
+- Emergency contacts
+- Local bulletin board
+- Winlink integration
 
-The operator console is important, but the larger value is the ability for neighbors to connect to a local portal using ordinary phones, tablets, and laptops.
+Future Navigation:
+AEGIS may support:
 
-The community portal should be simple enough for non-technical users.
-
-A neighbor should not need to know Linux, SSH, ham radio, mesh networking, or Raspberry Pi administration. They should be able to connect to a local Wi-Fi network and open a browser.
-
-3.3 Modular by Design
-
-AEGIS should not become a fragile pile of scripts.
-
-Every major capability should become a module:
-
-- dashboard
-- documents
-- search
-- network
-- portal
-- monitoring
-- sensors
-- Flipper
-- mesh
-- notes
-- AI
-- system tools
-
-Modules should expose clear capabilities, health status, configuration, and logs.
-
-3.4 Observable Systems
-
-Everything important should be observable.
-
-The operator should be able to see:
-
-- Pi temperature
-- undervoltage / throttling state
-- RAM usage
-- disk usage
-- network state
-- Wi-Fi clients
-- local services
-- portal health
-- connected nodes
-- USB expansion devices
-- sensors
-- batteries and power sources when supported
-
-If AEGIS becomes infrastructure, it must be monitored like infrastructure.
-
-3.5 Graceful Degradation
-
-AEGIS should remain useful even when some modules fail.
-
-If the community portal fails, the console should still work.
-If the mesh layer fails, the offline library should still work.
-If the touchscreen fails, SSH should still work.
-If Wi-Fi is down, local console tools should still work.
-If Internet access is gone, local docs and logs should still work.
-
-The system should never depend on a single fragile path.
-
-======================================================================
-4. CURRENT REFERENCE HARDWARE
-======================================================================
-
-The current AEGIS Console reference hardware is:
-
-- Raspberry Pi 3 Model B Rev 1.2
-- Debian GNU/Linux 13 Trixie
-- 64-bit aarch64 userspace
-- Adafruit 2.8 inch PiTFT resistive touchscreen
-- ILI9341 / fb_ili9340 framebuffer display
-- STMPE610 resistive touch controller
-- SPI enabled
-- `/dev/fb1` mapped to the PiTFT
-- Wi-Fi enabled
-- Bluetooth available
-- SSH enabled
-
-The PiTFT is configured with the following overlay:
-
-    dtoverlay=pitft28-resistive,rotate=90,speed=32000000,fps=20
-
-The display framebuffer appears as:
-
-    /dev/fb1
-
-The HDMI / primary framebuffer appears as:
-
-    /dev/fb0
-
-A systemd service maps tty1 to the PiTFT framebuffer after boot.
-
-This hardware is not the final definition of AEGIS. It is simply the first working hardware target.
-
-======================================================================
-5. SYSTEM MODEL
-======================================================================
-
-AEGIS OS is best understood as three connected product layers.
-
-----------------------------------------------------------------------
-5.1 AEGIS Console
-----------------------------------------------------------------------
-
-The AEGIS Console is the handheld or portable operator device.
-
-In the first build, this is the Raspberry Pi 3 with PiTFT and keyboard.
-
-Primary responsibilities:
-
-- boot into a readable dashboard
-- display system health
-- launch operator tools
-- access the offline library
-- manage the local portal
-- monitor nodes
-- provide SSH access to trusted systems
-- detect expansion devices
-- operate without a desktop environment
-
-The console is not meant to be a tiny laptop. The 320x240 display is best suited to purpose-built terminal interfaces, menus, dashboards, and status screens.
-
-----------------------------------------------------------------------
-5.2 AEGIS Hub
-----------------------------------------------------------------------
-
-The AEGIS Hub provides local services.
-
-The hub may run on the same Raspberry Pi as the console, or it may eventually run on a stronger device such as a home server, mini PC, or dedicated Raspberry Pi.
-
-Primary responsibilities:
-
-- local web portal
-- offline document hosting
-- local search index
-- announcements
-- message board
-- resource inventory
-- file sharing
-- service health API
-- authentication
-- logs and backups
-
-The hub is what neighbors connect to.
-
-----------------------------------------------------------------------
-5.3 AEGIS Nodes
-----------------------------------------------------------------------
-
-AEGIS Nodes are small devices that extend the system.
-
-Possible node types:
-
-- Raspberry Pi Zero W / Zero 2 W receiver nodes
-- ESP32 sensor nodes
-- OpenWrt routers
-- USB serial devices
-- battery monitor nodes
-- future LoRa nodes
-- future GPS/weather nodes
-
-Nodes should be low cost, reproducible, and replaceable.
-
-======================================================================
-6. COMMUNITY PORTAL
-======================================================================
-
-The community portal is one of the most important parts of AEGIS.
-
-The portal is the user-facing system for neighbors. It should work through an ordinary web browser and should not require installing an app.
-
-A first version of the portal should include:
-
-- welcome page
-- current announcements
-- local status updates
-- offline document links
-- message board
-- request help / offer help board
-- resource inventory
-- local map or neighborhood notes
-- emergency contacts
-- radio/channel plan if applicable
-- system status page
-
-The portal should be designed for clarity rather than style.
-
-During a stressful situation, users need large buttons, plain language, and obvious actions.
-
-Example top-level portal sections:
-
-    Announcements
-    Need Help
-    Offer Help
-    Resources
-    Medical
-    Offline Library
-    Neighborhood Map
-    Contact Board
-    System Status
-
-The portal should support roles:
-
-- Admin: full control
-- Operator: manage posts, docs, and status
-- Resident: post messages and requests
-- Guest: read public information
-
-Early versions may use simple authentication. Later versions should include better user management.
-
-======================================================================
-7. OFFLINE KNOWLEDGE BASE
-======================================================================
-
-The offline knowledge base is a core AEGIS function.
-
-Information is infrastructure.
-
-When connectivity is down, people still need access to reliable documents. AEGIS should store and serve information locally.
-
-Initial document categories:
-
-- Wikipedia / Kiwix ZIM files
-- first aid
-- CPR
-- wilderness medicine
-- hurricane preparedness
-- water purification
-- sanitation
-- food safety
-- shelter
-- power and generators
-- communications
-- networking
-- Linux administration
-- Raspberry Pi documentation
-- OpenWrt documentation
-- ESP32 documentation
-- local SOPs
-- family documents where appropriate and encrypted
-- community procedures
-
-The long-term goal is one search interface that can search:
-
-- ZIM files
-- PDFs
-- Markdown
-- plain text
-- HTML
-- notes
-- logs
-- manuals
-
-The search system should be local and should not require the Internet.
-
-The 320x240 console may use a terminal-first viewer. The community portal may provide a larger browser-based document interface for phones and laptops.
-
-======================================================================
-8. MONITORING
-======================================================================
-
-AEGIS should monitor everything available in the current technology stack.
-
-Monitoring begins with the Pi itself:
-
-- CPU temperature
-- CPU load
-- RAM usage
-- disk usage
-- undervoltage / throttling state
-- uptime
-- network interfaces
-- Wi-Fi signal
-- connected USB devices
-- running services
-- logs
-
-The next monitoring layer is AEGIS services:
-
-- portal service
-- document service
-- search service
-- database
-- DNS/DHCP if used
-- access point status
-- backup status
-
-The next layer is connected nodes:
-
-- node online/offline state
-- battery level if available
-- sensor readings
-- last heartbeat
-- firmware version
-- location/role label
-
-Possible environmental readings:
-
-- temperature
-- humidity
-- light
-- motion
-- noise
-- air quality if hardware is added
-- water level if hardware is added
-- battery / solar if hardware is added
-
-Monitoring is not for decoration. It is how the operator knows whether the system can be trusted.
-
-======================================================================
-9. COMMUNICATION AND NETWORKING
-======================================================================
-
-AEGIS should support multiple communication paths.
-
-Initial communication methods:
-
-- local Wi-Fi access point
-- existing home Wi-Fi client mode
-- Ethernet where available
-- SSH
-- local web portal
-
-Future communication methods:
-
-- OpenWrt mesh experiments
-- Raspberry Pi node relays
-- ESP32 low-power status nodes
-- LoRa where legal and appropriate
-- amateur radio integration where licensed and appropriate
-- USB serial
-- Bluetooth experiments
-
-The goal is not to build an illegal or disruptive radio system.
-
-The goal is lawful local connectivity and practical fallback communication.
-
-A realistic first community network might consist of:
-
-- AEGIS Console as admin terminal
-- AEGIS Hub as portal/document server
-- one or more OpenWrt routers for wider local Wi-Fi coverage
-- Pi Zero nodes for receiver/display endpoints
-- ESP32 nodes for simple sensor/status reporting
-
-The network should be simple enough to explain and deploy.
-
-======================================================================
-10. FLIPPER ZERO AS EXPANSION MODULE
-======================================================================
-
-The Flipper Zero should not become the heart of AEGIS.
-
-It should be treated as a dockable instrument.
-
-This mirrors real field practice: a multimeter, radio, GPS, or analyzer is not the command center. It is a tool plugged in when needed.
-
-When connected over USB, AEGIS should eventually detect the Flipper and expose supported workflows:
-
-- identify device
-- show connection status
-- open serial console if applicable
-- access files where supported
-- log interactions
-- launch approved utilities
-- document workflows
-
-All Flipper-related features should remain lawful and user-controlled. AEGIS should not automate unauthorized access, interference, credential theft, or disruptive actions.
-
-The guiding idea is:
-
-    The Pi is the brain.
-    The Flipper is an instrument.
-
-======================================================================
-11. ESP32 AND SENSOR NODES
-======================================================================
-
-ESP32 devices are valuable because they are low cost, low power, and easy to deploy.
-
-Possible ESP32 node roles:
-
-- temperature / humidity sensor
-- light sensor
-- motion sensor
-- sound/noise level sensor
-- simple status beacon
-- battery monitor
-- door/window status
-- water level sensor
-- remote button / alert device
-- local display receiver
-
-The XIAO ESP32S3 Sense is especially interesting as a future sensor/camera/audio module.
-
-AEGIS should treat ESP32s as modular nodes with:
-
-- node ID
-- role
-- firmware version
-- last seen timestamp
-- battery state if available
-- sensor payload
-- health status
-
-======================================================================
-12. SOFTWARE ARCHITECTURE
-======================================================================
-
-AEGIS should be organized as a modular Python-first project with room for additional services.
-
-Proposed structure:
-
-    aegis-os/
-        README.md
-        WHITEPAPER.txt
-        install.sh
-        pyproject.toml
-        aegis/
-            core/
-                config.py
-                events.py
-                logging.py
-                plugins.py
-                state.py
-            ui/
-                dashboard.py
-                menu.py
-                widgets/
-            plugins/
-                monitoring/
-                docs/
-                network/
-                portal/
-                flipper/
-                esp32/
-                notes/
-                ai/
-            portal/
-                app.py
-                templates/
-                static/
-        docs/
-        assets/
-        systemd/
-        scripts/
-        data/
-
-The core should provide:
-
-- configuration loading
-- event bus
-- plugin discovery
-- logging
-- state store
-- service health registry
-- command execution wrappers
-
-Each plugin should expose:
-
-- name
-- description
-- version
-- status
-- menu entries
-- health check
-- optional background service
-- optional web routes
-
-The UI should not hard-code every feature. It should discover available modules.
-
-======================================================================
-13. DATA MODEL
-======================================================================
-
-Early AEGIS should use simple local storage.
-
-Recommended data layers:
-
-- plain files for documents
-- SQLite for portal data
-- JSON or YAML for configuration
-- rotating text logs for system events
-- Markdown for operator notes
-
-Important data types:
-
-- announcements
-- messages
-- help requests
-- offers
-- resources
-- nodes
-- sensor readings
-- incidents
-- documents
-- users
-- service health records
-
-Data should be easy to back up and recover.
-
-Complex distributed databases are not appropriate for early versions.
-
-======================================================================
-14. SECURITY MODEL
-======================================================================
-
-AEGIS is a local community system, but security still matters.
-
-Initial security goals:
-
-- preserve SSH access for the operator
-- avoid exposing admin controls publicly
-- separate admin/operator/resident/guest capabilities
-- log administrative actions
-- avoid storing sensitive family documents unencrypted
-- avoid default passwords
-- avoid unnecessary services
-- keep recovery paths available
-
-The system should assume that the local network may include unknown devices.
-
-Public information can be public. Operational controls should not be.
-
-======================================================================
-15. LOGO AND VISUAL IDENTITY
-======================================================================
-
-The AEGIS insignia should represent Florida, community, knowledge, and communication.
-
-The logo should avoid false geography. Mountains do not fit the project identity because the reference community is in Florida.
-
-Preferred symbolism:
-
-- central A for AEGIS
-- shield-like structure for protection
-- open book for preserved knowledge
-- signal arcs for communication
-- water or horizon line for Florida/coastal identity
-- community symbol for neighbors
-- clean circular or shield framing
-- high-contrast monochrome for engraving and boot screens
-
-The logo should work as:
-
-- application icon
-- PiTFT boot mark
-- GitHub repository mark
-- sticker
-- laser engraving
-- field manual cover
-- equipment label
-
-The identity should feel practical, local, and trustworthy.
-
-It should not feel like generic AI art, corporate software branding, or fear-based survival marketing.
-
-======================================================================
-16. MVP DEFINITION
-======================================================================
-
-The first complete AEGIS MVP is achieved when the system can do the following:
-
-1. Power on and boot reliably.
-2. Display an operator dashboard on the PiTFT.
-3. Maintain SSH fallback access.
-4. Show system health, including power warnings.
-5. Provide keyboard-driven menus.
-6. Access an offline document library.
-7. Search local text/Markdown/PDF documents.
-8. Host a local web portal over Wi-Fi.
-9. Allow a phone to connect and view local resources.
-10. Provide a simple message or bulletin board.
-11. Provide a safe shutdown workflow.
-12. Preserve logs and notes locally.
-
-This MVP does not require mesh networking, LoRa, AI, Flipper integration, or sensor nodes.
-
-Those are expansion phases.
-
-======================================================================
-17. ROADMAP
-======================================================================
-
-Phase 0: Hardware Foundation
-
-Status: In progress / mostly complete.
-
-- Raspberry Pi 3 booting
-- SSH working
-- Wi-Fi working
-- SPI enabled
-- PiTFT overlay configured
-- framebuffer confirmed
-- console mapped to PiTFT
-
-Phase 1: Project Scaffold
-
-- create GitHub repository
-- add README
-- add whitepaper
-- add logo assets
-- add systemd service files
-- create Python package layout
-- document PiTFT setup
-
-Phase 2: Operator Dashboard
-
-- terminal dashboard
-- system monitor
-- power/throttle warning
-- network status
-- menu navigation
-- shutdown/reboot actions
-
-Phase 3: Offline Documents
-
-- document directory structure
-- text/Markdown viewer
-- PDF support
-- Kiwix/ZIM support
-- local search
-
-Phase 4: Community Portal
-
-- local web server
-- basic portal UI
-- announcements
-- message board
-- resource board
-- local authentication
-
-Phase 5: Network Services
-
-- local AP mode
-- DNS/DHCP experiments
-- node discovery
-- OpenWrt integration notes
-- portable receiver design
-
-Phase 6: Monitoring and Nodes
-
-- node heartbeat protocol
-- ESP32 sensor nodes
-- service monitor
-- portal status
-- logs database
-
-Phase 7: Expansion Modules
-
-- Flipper USB detection
-- USB serial tools
 - GPS
-- LoRa experiments
-- SDR experiments
+- Offline maps
+- Waypoints
+- Compass
+- Grid coordinates
+- Weather
+- Tides
+- Sun and moon data
 
-Phase 8: AI Assistance
+Hardware Integration:
+AEGIS is intended to support modular hardware integrations, including:
 
-- offline command/document helper where feasible
-- online AI helper when Internet is available
-- no cloud dependency for core operations
+- ESP32 sensors
+- Battery monitors
+- GPS receivers
+- LoRa radios
+- SDR devices
+- USB storage
+- Cameras
+- Flipper Zero companion workflows
+- Environmental sensors
 
-======================================================================
-18. NON-GOALS
-======================================================================
+Community Vision:
+AEGIS OS is designed for individuals first, but neighborhoods next.
 
-AEGIS OS should not become:
+A future AEGIS node may serve local knowledge, bulletins, contacts, and resources over a local Wi-Fi network without Internet access. Multiple AEGIS nodes may eventually synchronize selected community information.
 
-- a laptop replacement
-- a desktop environment project
-- a media center
-- a gaming handheld
-- an offensive hacking platform
-- a cloud-only app
-- a brittle pile of undocumented scripts
-- a system that requires expert knowledge for neighbors to use
+AEGIS is not a prepper gadget. It is a practical resilience terminal useful on ordinary days and more valuable during disruptions.
 
-AEGIS may include advanced tools for the operator, but the mission remains community resilience.
+Conclusion:
+AEGIS OS is evolving into an offline-first field terminal for local resilience.
 
-======================================================================
-19. SUCCESS CRITERIA
-======================================================================
+Its purpose is simple:
 
-AEGIS succeeds if:
-
-- Ian can carry it, power it, and operate it without a monitor.
-- It provides useful local information when offline.
-- A neighbor can connect with a phone and understand what to do.
-- The system can host local announcements and resource information.
-- The operator can monitor system health.
-- The system can be rebuilt from documentation.
-- Expansion modules can be added without rewriting everything.
-- The project remains useful even when some features are unavailable.
-
-AEGIS fails if:
-
-- it becomes too complicated to operate under stress
-- it depends on cloud services for core functions
-- it becomes a collection of unrelated scripts
-- it requires a desktop monitor to recover
-- it ignores the needs of non-technical neighbors
-
-======================================================================
-20. CONCLUSION
-======================================================================
-
-AEGIS OS began as a Raspberry Pi cyberdeck project, but its purpose is larger than the hardware.
-
-The deck is the interface.
-The hub is the infrastructure.
-The nodes are the reach.
-The library is the memory.
-The portal is the meeting place.
-The community is the mission.
-
-AEGIS is built on the belief that resilience is not isolation.
-Resilience is connection.
-
-Knowledge preserved.
-Communication maintained.
-Community strengthened.
-
-That is the purpose of AEGIS OS.
+Preserve knowledge.
+Strengthen communities.
+Remain operational.

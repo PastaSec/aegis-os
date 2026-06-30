@@ -1,30 +1,54 @@
 # AEGIS OS Roadmap
 
-## Alpha
+## v0.1.0-alpha — Appliance Alpha
 
-* [x] Bootstrap
-* [x] GitHub
-* [x] Branding
-* [x] Dashboard
-* [x] Live Monitoring
-* [x] Interactive Menu
+- [x] GitHub repository
+- [x] Logo and branding
+- [x] Whitepaper
+- [x] Python package
+- [x] PiTFT support
+- [x] Boot splash
+- [x] Boot loading sequence
+- [x] Dashboard
+- [x] Knowledge packs
+- [x] Markdown viewer
+- [x] Field Journal foundation
+- [x] Inventory foundation
+- [x] Universal search foundation
+- [x] Appliance autostart
 
-## Beta
+## v0.2.0-alpha — Field Terminal
 
-* [ ] Knowledge Service
-* [ ] Markdown Viewer
-* [ ] Search Engine
-* [ ] Notes
-* [ ] Community Portal
-* [ ] Package Manager
+- [ ] Mission-focused home screen
+- [ ] Dedicated Hardware screen
+- [ ] Dedicated System screen
+- [ ] Screen manager
+- [ ] Consistent navigation model
+- [ ] Scrollable document viewer
+- [ ] Improved universal search
+- [ ] Favorites and recent documents
+- [ ] Journal entry creation
+- [ ] Inventory quantities and locations
+- [ ] Communications placeholder
+- [ ] Navigation placeholder
 
-## Version 1.0
+## v0.3.0 — Knowledge Expansion
 
-* [ ] Knowledge Packs
-* [ ] Offline Wikipedia
-* [ ] Mesh Communication
-* [ ] Local Web Portal
-* [ ] Automatic Installation
-* [ ] Hardware Detection
-* [ ] Community Edition
+- [ ] AEGIS Knowledge Pack installer
+- [ ] Larger curated document packs
+- [ ] First aid pack
+- [ ] Florida hurricane pack
+- [ ] Linux/Raspberry Pi pack
+- [ ] Radio communications pack
+- [ ] Kiwix/ZIM integration hooks
 
+## v1.0 — Community Edition
+
+- [ ] Local web portal
+- [ ] Community bulletin board
+- [ ] Emergency contacts
+- [ ] Offline maps
+- [ ] Mesh/LoRa integration
+- [ ] Backup and restore
+- [ ] Install script
+- [ ] Release image
