@@ -9,7 +9,7 @@ from aegis.monitor import get_system_state
 from aegis.search import search_all
 
 
-HOME_ITEMS = ["Knowledge", "Field Journal", "Inventory", "Community", "Hardware", "Settings"]
+HOME_ITEMS = ["Knowledge", "Field Journal", "Inventory", "Communications", "Navigation", "Hardware", "System"]
 
 
 class AegisDashboard(App):
@@ -141,6 +141,8 @@ class AegisDashboard(App):
             return len(inventory_items(self.current_inventory_category))
         if self.view == "search_results":
             return min(8, len(self.search_results))
+        if self.view in ["hardware", "system", "placeholder"]:
+            return 0
         return 0
 
     def action_cursor_up(self) -> None:
@@ -169,6 +171,14 @@ class AegisDashboard(App):
             elif item == "Inventory":
                 self.stack.append((self.view, self.selected))
                 self.view = "inventory"
+                self.selected = 0
+            elif item == "Hardware":
+                self.stack.append((self.view, self.selected))
+                self.view = "hardware"
+                self.selected = 0
+            elif item == "System":
+                self.stack.append((self.view, self.selected))
+                self.view = "system"
                 self.selected = 0
             else:
                 self.stack.append((self.view, self.selected))
@@ -252,10 +262,8 @@ class AegisDashboard(App):
         if self.view == "home":
             state = get_system_state()
             body = (
-                f"IP {state.ip}\n"
-                f"CPU {state.cpu}  RAM {state.memory}\n"
-                f"Disk {state.disk} Temp {state.temp}\n"
-                f"Power {state.power}\n\n"
+                f"Mission Ready\n"
+                f"{state.ip}\n\n"
                 f"{self.menu(HOME_ITEMS)}"
             )
             self.write(self.frame("AEGIS OS", f"[bold green]STATUS {state.readiness}[/bold green]", body, "↑↓ Select  Enter Open  / Search  Q Quit"))
@@ -311,6 +319,30 @@ class AegisDashboard(App):
         elif self.view == "search_results":
             items = [f"{result.pack_name}: {result.document_title}" for result in self.search_results[:8]]
             self.write(self.frame("Search Results", f"Results: {len(self.search_results)}", self.menu(items)))
+
+        elif self.view == "hardware":
+            state = get_system_state()
+            body = (
+                f"Host    {state.host}\n"
+                f"IP      {state.ip}\n"
+                f"CPU     {state.cpu}\n"
+                f"RAM     {state.memory}\n"
+                f"Disk    {state.disk}\n"
+                f"Temp    {state.temp}\n"
+                f"Power   {state.power}\n"
+                f"Uptime  {state.uptime}"
+            )
+            self.write(self.frame("Hardware", "System Diagnostics", body))
+
+        elif self.view == "system":
+            body = (
+                "AEGIS OS v0.1.0-alpha\n"
+                "Mode: Field Terminal\n\n"
+                "Update, backup, restore,\n"
+                "logs, and configuration\n"
+                "will live here."
+            )
+            self.write(self.frame("System", "Maintenance", body))
 
         elif self.view == "placeholder":
             self.write(self.frame("AEGIS OS", "Not Built Yet", "This module is reserved for Alpha expansion."))
