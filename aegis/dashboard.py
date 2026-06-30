@@ -6,10 +6,11 @@ from aegis.core.router import Router
 from aegis.inventory import categories as inventory_categories, items as inventory_items
 from aegis.journal import categories as journal_categories, entries as journal_entries
 from aegis.knowledge import load_packs
+from aegis.models.document_viewer import DocumentViewState
 from aegis.screens.hardware import render_hardware_screen
 from aegis.screens.inventory import render_inventory_category_screen, render_inventory_item_screen, render_inventory_screen
 from aegis.screens.journal import render_journal_category_screen, render_journal_entry_screen, render_journal_screen
-from aegis.screens.knowledge import render_document_screen, render_knowledge_screen, render_pack_screen
+from aegis.screens.knowledge import document_line_count, render_document_screen, render_knowledge_screen, render_pack_screen
 from aegis.monitor import get_system_state
 from aegis.screens.home import render_home_screen
 from aegis.screens.placeholder import render_placeholder_screen
@@ -41,6 +42,10 @@ class AegisDashboard(App):
         ("escape", "back", "Back"),
         ("up,k", "cursor_up", "Up"),
         ("down,j", "cursor_down", "Down"),
+        ("pageup", "page_up", "Page Up"),
+        ("pagedown", "page_down", "Page Down"),
+        ("home", "document_home", "Top"),
+        ("end", "document_end", "Bottom"),
         ("enter", "select", "Select"),
         ("/", "search", "Search"),
         ("r", "refresh", "Refresh"),
@@ -66,6 +71,7 @@ class AegisDashboard(App):
 
         self.search_query = ""
         self.search_results = []
+        self.document_view = DocumentViewState()
 
     @property
     def view(self) -> str:
@@ -138,6 +144,13 @@ class AegisDashboard(App):
         self.selected = route.selected
         self.draw()
 
+    def document_total_lines(self) -> int:
+        return document_line_count(self.current_doc)
+
+    def scroll_document(self, amount: int) -> None:
+        self.document_view.scroll(amount, self.document_total_lines())
+        self.draw()
+
     def item_count(self) -> int:
         if self.view == "home":
             return len(HOME_ITEMS)
@@ -160,16 +173,44 @@ class AegisDashboard(App):
         return 0
 
     def action_cursor_up(self) -> None:
+        if self.view == "document":
+            self.scroll_document(-1)
+            return
+
         count = self.item_count()
         if count:
             self.selected = (self.selected - 1) % count
         self.draw()
 
     def action_cursor_down(self) -> None:
+        if self.view == "document":
+            self.scroll_document(1)
+            return
+
         count = self.item_count()
         if count:
             self.selected = (self.selected + 1) % count
         self.draw()
+
+    def action_page_up(self) -> None:
+        if self.view == "document":
+            self.document_view.page_up(self.document_total_lines())
+            self.draw()
+
+    def action_page_down(self) -> None:
+        if self.view == "document":
+            self.document_view.page_down(self.document_total_lines())
+            self.draw()
+
+    def action_document_home(self) -> None:
+        if self.view == "document":
+            self.document_view.home()
+            self.draw()
+
+    def action_document_end(self) -> None:
+        if self.view == "document":
+            self.document_view.end(self.document_total_lines())
+            self.draw()
 
     def action_select(self) -> None:
         if self.view == "home":
@@ -193,6 +234,7 @@ class AegisDashboard(App):
 
         elif self.view == "pack" and self.current_pack and self.current_pack.documents:
             self.current_doc = self.current_pack.documents[self.selected]
+            self.document_view.reset()
             self.navigate("document")
 
         elif self.view == "journal" and self.journal_categories:
@@ -222,6 +264,7 @@ class AegisDashboard(App):
                 "path": result.path,
             })()
             self.current_pack = None
+            self.document_view.reset()
             self.navigate("document")
 
         self.draw()
@@ -238,7 +281,7 @@ class AegisDashboard(App):
             self.write(render_pack_screen(self.current_pack, self.selected))
 
         elif self.view == "document":
-            self.write(render_document_screen(self.current_doc))
+            self.write(render_document_screen(self.current_doc, self.document_view.offset, self.document_view.height))
 
         elif self.view == "journal":
             self.write(render_journal_screen(self.journal_categories, self.selected))

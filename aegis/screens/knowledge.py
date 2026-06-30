@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import Protocol
 
 from aegis.knowledge import KnowledgePack, read_document
+from aegis.models.document_viewer import DEFAULT_DOCUMENT_HEIGHT
 from aegis.widgets.frame import render_frame
 from aegis.widgets.listbox import render_listbox
-from aegis.widgets.markdown import render_markdown_preview
+from aegis.widgets.markdown import render_markdown_lines
+from aegis.widgets.viewer import render_document_view
 
 
 class DocumentLike(Protocol):
@@ -24,8 +26,17 @@ def render_pack_screen(pack: KnowledgePack | None, selected: int) -> str:
     return render_frame(title, "Documents", render_listbox(items, selected))
 
 
-def render_document_screen(document: DocumentLike | None) -> str:
+def render_document_screen(
+    document: DocumentLike | None,
+    offset: int = 0,
+    height: int = DEFAULT_DOCUMENT_HEIGHT,
+) -> str:
     title = document.title if document else "Document"
     text = read_document(document.path) if document else "No document selected"
-    preview = render_markdown_preview(text)
-    return render_frame(title, "Viewer", preview)
+    body, status, _ = render_document_view(text, offset, height)
+    return render_frame(title, status, body)
+
+
+def document_line_count(document: DocumentLike | None) -> int:
+    text = read_document(document.path) if document else "No document selected"
+    return len(render_markdown_lines(text))
