@@ -1,0 +1,65 @@
+{
+  "schema": "aegis.pack-index/1",
+  "generated": "2026-07-01T22:22:49+00:00",
+  "generator": "AEGIS Foundry",
+  "pack_id": "fema",
+  "document_count": 4,
+  "documents": [
+    {
+      "title": "Emergency Supply Kit",
+      "path": "docs/emergency-supply-kit.md",
+      "summary": "Core supplies to keep available before a disaster or outage.",
+      "category": "Preparedness",
+      "tags": [
+        "emergency kit",
+        "supplies",
+        "preparedness"
+      ],
+      "author": "FEMA / Ready.gov",
+      "revision": "2026",
+      "size": 1357
+    },
+    {
+      "title": "Evacuation Planning",
+      "path": "docs/evacuation.md",
+      "summary": "Practical steps for deciding when and how to evacuate.",
+      "category": "Operations",
+      "tags": [
+        "evacuation",
+        "shelter",
+        "family plan"
+      ],
+      "author": "FEMA / Ready.gov",
+      "revision": "2026",
+      "size": 1433
+    },
+    {
+      "title": "Hurricane Preparedness",
+      "path": "docs/hurricane-preparedness.md",
+      "summary": "Actions to take before, during, and after hurricane conditions.",
+      "category": "Preparedness",
+      "tags": [
+        "hurricane",
+        "evacuation",
+        "flooding"
+      ],
+      "author": "FEMA / Ready.gov",
+      "revision": "2026",
+      "size": 1482
+    },
+    {
+      "title": "Power Outage Safety",
+      "path": "docs/power-outage.md",
+      "summary": "Safe actions for extended outages, generator use, and food protection.",
+      "category": "Power",
+      "tags": [
+        "power outage",
+        "generator",
+        "carbon monoxide"
+      ],
+      "author": "FEMA / Ready.gov",
+      "revision": "2026",
+      "size": 1458
+    }
+  ]
+}

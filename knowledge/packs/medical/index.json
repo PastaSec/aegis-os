@@ -1,0 +1,19 @@
+{
+  "schema": "aegis.pack-index/1",
+  "generated": "2026-07-01T22:23:35+00:00",
+  "generator": "AEGIS Foundry",
+  "pack_id": "medical",
+  "document_count": 1,
+  "documents": [
+    {
+      "title": "Bleeding",
+      "path": "docs/bleeding.md",
+      "summary": "",
+      "category": "",
+      "tags": [],
+      "author": "",
+      "revision": "",
+      "size": 254
+    }
+  ]
+}

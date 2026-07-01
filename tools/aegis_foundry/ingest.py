@@ -10,8 +10,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from tools.aegis_foundry.index import write_index
 from tools.aegis_foundry.manifest import list_values
-from tools.aegis_foundry.pack import DEFAULT_PACKS_DIR, KnowledgePackPath, resolve_path
+from tools.aegis_foundry.pack import DEFAULT_PACKS_DIR, load_pack_path, resolve_path
 from tools.aegis_foundry.validate import split_front_matter, validate_pack
 
 
@@ -87,7 +88,10 @@ def import_folder(options: ImportOptions) -> ImportResult:
     except ValueError as exc:
         result.errors.append(str(exc))
         return result
-    result.validation = validate_pack(KnowledgePackPath(path=pack_path))
+
+    pack = load_pack_path(pack_path)
+    write_index(pack)
+    result.validation = validate_pack(pack)
     return result
 
 

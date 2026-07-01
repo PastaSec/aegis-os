@@ -1,0 +1,33 @@
+{
+  "schema": "aegis.pack-index/1",
+  "generated": "2026-07-01T22:22:49+00:00",
+  "generator": "AEGIS Foundry",
+  "pack_id": "florida",
+  "document_count": 2,
+  "documents": [
+    {
+      "title": "Generator Safety",
+      "path": "docs/generator-safety.md",
+      "summary": "Safe generator operation during outages.",
+      "category": "Power",
+      "tags": [
+        "generator",
+        "fuel",
+        "hurricane"
+      ],
+      "author": "AEGIS",
+      "revision": "2026",
+      "size": 440
+    },
+    {
+      "title": "Hurricane Checklist",
+      "path": "docs/hurricane-checklist.md",
+      "summary": "",
+      "category": "",
+      "tags": [],
+      "author": "",
+      "revision": "",
+      "size": 541
+    }
+  ]
+}

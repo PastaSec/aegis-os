@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from tools.aegis_foundry.commands import (
+    command_generate_index,
     command_import_folder,
     command_inspect_pack,
     command_list_packs,
@@ -37,6 +38,10 @@ def build_parser() -> argparse.ArgumentParser:
     import_parser.add_argument("--overwrite", action="store_true", help="Replace existing output pack")
     import_parser.add_argument("--dry-run", action="store_true", help="Show planned import without writing files")
     import_parser.set_defaults(func=command_import_folder)
+
+    index_parser = subparsers.add_parser("generate-index", help="Generate index.json for Knowledge Packs")
+    index_parser.add_argument("path", nargs="?", default=None, help="Optional pack root or pack path")
+    index_parser.set_defaults(func=command_generate_index)
 
     return parser
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from tools.aegis_foundry.index import write_index
 from tools.aegis_foundry.ingest import ImportResult, options_from_args, import_folder
 from tools.aegis_foundry.pack import discover_packs, resolve_pack_path
 from tools.aegis_foundry.validate import validate_pack, validate_path
@@ -59,6 +60,19 @@ def command_inspect_pack(args: argparse.Namespace) -> int:
     else:
         print("Validation: OK")
     return 1 if report.has_errors else 0
+
+
+def command_generate_index(args: argparse.Namespace) -> int:
+    packs = discover_packs(args.path)
+    if not packs:
+        target = args.path if args.path else "knowledge/packs"
+        print(f"ERROR: {target}: no Knowledge Packs found")
+        return 1
+
+    for pack in packs:
+        index_path = write_index(pack)
+        print(f"Index written: {index_path} ({len(pack.documents)} documents)")
+    return 0
 
 
 def command_validate(args: argparse.Namespace) -> int:

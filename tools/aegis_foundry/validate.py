@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from tools.aegis_foundry.manifest import LIST_FIELDS, REQUIRED_FIELDS, Manifest, load_manifest
+from tools.aegis_foundry.manifest import LIST_FIELDS, REQUIRED_FIELDS, Manifest, list_values, load_manifest
 from tools.aegis_foundry.pack import KnowledgePackPath, discover_packs, resolve_path
 from tools.aegis_foundry.yaml_compat import safe_load
 
@@ -174,7 +175,67 @@ def validate_pack(pack: KnowledgePackPath) -> ValidationReport:
     for document in documents:
         validate_document(document, report)
 
+    validate_index(pack, report)
+
     return report
+
+
+def validate_index(pack: KnowledgePackPath, report: ValidationReport) -> None:
+    """Verify a generated index.json. All findings are warnings (non-fatal)."""
+    # Imported lazily: index.py imports from this module.
+    from tools.aegis_foundry.index import INDEX_FILENAME, INDEX_SCHEMA, build_index
+
+    index_path = pack.path / INDEX_FILENAME
+    if not index_path.exists():
+        report.warning(index_path, "index.json is missing; run generate-index to create it")
+        return
+
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        report.warning(index_path, f"index.json could not be parsed: {exc}")
+        return
+
+    if not isinstance(data, dict):
+        report.warning(index_path, "index.json root must be an object")
+        return
+
+    if data.get("schema") != INDEX_SCHEMA:
+        report.warning(index_path, f"index.json schema should be '{INDEX_SCHEMA}'")
+
+    entries = data.get("documents")
+    if not isinstance(entries, list):
+        report.warning(index_path, "index.json documents must be a list")
+        return
+
+    expected = {entry["path"]: entry for entry in build_index(pack)["documents"]}
+    seen: set[str] = set()
+
+    for entry in entries:
+        if not isinstance(entry, dict):
+            report.warning(index_path, "index entry must be an object")
+            continue
+
+        relative = str(entry.get("path") or "").strip()
+        if not relative:
+            report.warning(index_path, "index entry is missing a path")
+            continue
+
+        seen.add(relative)
+        if relative not in expected:
+            report.warning(index_path, f"indexed document missing on disk: {relative}")
+            continue
+
+        reference = expected[relative]
+        for field_name in ("title", "summary", "category", "author", "revision"):
+            if str(entry.get(field_name) or "") != str(reference.get(field_name) or ""):
+                report.warning(index_path, f"index {field_name} mismatch for {relative}")
+        if list_values(entry.get("tags")) != reference.get("tags"):
+            report.warning(index_path, f"index tags mismatch for {relative}")
+
+    for relative in expected:
+        if relative not in seen:
+            report.warning(index_path, f"document not represented in index: {relative}")
 
 
 def validate_path(path: str | Path | None = None) -> ValidationReport:

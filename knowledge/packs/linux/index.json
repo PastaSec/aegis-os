@@ -1,0 +1,19 @@
+{
+  "schema": "aegis.pack-index/1",
+  "generated": "2026-07-01T22:22:49+00:00",
+  "generator": "AEGIS Foundry",
+  "pack_id": "linux",
+  "document_count": 1,
+  "documents": [
+    {
+      "title": "Basic Commands",
+      "path": "docs/basic-commands.md",
+      "summary": "",
+      "category": "",
+      "tags": [],
+      "author": "",
+      "revision": "",
+      "size": 255
+    }
+  ]
+}
