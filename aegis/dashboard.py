@@ -20,7 +20,13 @@ from aegis.operator import (
 from aegis.screens.hardware import render_hardware_screen
 from aegis.screens.inventory import render_inventory_category_screen, render_inventory_item_screen, render_inventory_screen
 from aegis.screens.journal import render_journal_category_screen, render_journal_entry_screen, render_journal_screen
-from aegis.screens.knowledge import document_line_count, render_document_screen, render_knowledge_screen, render_pack_screen
+from aegis.screens.knowledge import (
+    document_line_count,
+    render_document_screen,
+    render_knowledge_screen,
+    render_pack_details_screen,
+    render_pack_screen,
+)
 from aegis.monitor import get_system_state
 from aegis.screens.home import render_home_screen
 from aegis.screens.operator import render_operator_documents_screen
@@ -219,6 +225,8 @@ class AegisDashboard(App):
             return len(HOME_ITEMS)
         if self.view == "knowledge":
             return len(self.packs)
+        if self.view == "pack_details":
+            return 0
         if self.view == "pack" and self.current_pack:
             return len(navigator_entries(self.current_pack, self.current_knowledge_path))
         if self.view == "recent_documents":
@@ -313,6 +321,9 @@ class AegisDashboard(App):
 
         elif self.view == "knowledge" and self.packs:
             self.current_pack = self.packs[self.selected]
+            self.navigate("pack_details")
+
+        elif self.view == "pack_details" and self.current_pack:
             self.current_knowledge_path = root_path(self.current_pack)
             self.navigate("pack")
 
@@ -369,6 +380,9 @@ class AegisDashboard(App):
 
         elif self.view == "knowledge":
             self.write(render_knowledge_screen(self.packs, self.selected))
+
+        elif self.view == "pack_details":
+            self.write(render_pack_details_screen(self.current_pack))
 
         elif self.view == "pack":
             entries = navigator_entries(self.current_pack, self.current_knowledge_path)

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
@@ -32,6 +32,14 @@ class KnowledgePack:
     icon: str
     path: Path
     documents: list[Document]
+    version: str = ""
+    status: str = ""
+    license: str = ""
+    source: str = ""
+    homepage: str = ""
+    author: str = ""
+    categories: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 def title_from_path(path: Path) -> str:
@@ -111,6 +119,14 @@ def load_pack(pack_path: Path) -> KnowledgePack | None:
         icon=data.get("icon", ""),
         path=pack_path,
         documents=documents,
+        version=str(data.get("version") or ""),
+        status=str(data.get("status") or ""),
+        license=str(data.get("license") or ""),
+        source=str(data.get("source") or ""),
+        homepage=str(data.get("homepage") or ""),
+        author=str(data.get("author") or ""),
+        categories=normalize_tags(data.get("categories")),
+        tags=normalize_tags(data.get("tags")),
     )
 
 
