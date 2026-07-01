@@ -1,7 +1,7 @@
 # AEGIS OS
 # Knowledge Pack Specification
 
-Version: v0.11.5-alpha
+Version: v0.15.0-alpha
 Status: Platform Contract
 
 ---
@@ -46,6 +46,7 @@ Recommended layout for curated packs:
 ```text
 knowledge/packs/<pack-id>/
   manifest.yaml
+  index.json
   README.md
   docs/
     <document>.md
@@ -55,6 +56,7 @@ knowledge/packs/<pack-id>/
   assets/
 ```
 
+`index.json` is an optional Foundry-generated discovery index (see below).
 `sources/` and `assets/` are reserved for curation, provenance, and future Runtime support. Runtime must not require them for current Markdown document loading.
 
 ---
@@ -167,6 +169,49 @@ Runtime currently uses:
 - `summary`
 
 Other metadata is preserved for Foundry, search quality, provenance, and future Runtime behavior.
+
+---
+
+# Knowledge Pack Index
+
+A Knowledge Pack may include an optional `index.json` at the pack root.
+
+The index is a lightweight, Foundry-generated discovery file. It lets Runtime
+build its document list without parsing every Markdown document at startup.
+
+The index is generated automatically. Operators should never edit it manually.
+
+Structure:
+
+```json
+{
+  "schema": "aegis.pack-index/1",
+  "generated": "2026-07-01T00:00:00+00:00",
+  "generator": "AEGIS Foundry",
+  "pack_id": "fema",
+  "document_count": 4,
+  "documents": [
+    {
+      "title": "Emergency Supply Kit",
+      "path": "docs/preparedness/emergency-supply-kit.md",
+      "summary": "Essential emergency supplies for 72 hours.",
+      "category": "Preparedness",
+      "tags": ["preparedness", "supplies", "emergency"],
+      "author": "FEMA",
+      "revision": "2025",
+      "size": 2418
+    }
+  ]
+}
+```
+
+Rules:
+
+- `schema` identifies the index format; Runtime ignores unknown schemas and falls back.
+- `path` is pack-relative and POSIX-style, resolved against the pack directory.
+- Document bodies remain in Markdown. The index carries metadata only.
+- The index is optional. Packs without an index remain fully valid.
+- Runtime must fall back to recursive Markdown discovery when the index is absent, unreadable, or of an unrecognized schema.
 
 ---
 

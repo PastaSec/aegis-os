@@ -1,7 +1,7 @@
 # AEGIS OS
 # Foundry Specification
 
-Version: v0.11.5-alpha
+Version: v0.15.0-alpha
 Status: Platform Contract
 
 ---
@@ -38,6 +38,7 @@ Foundry owns:
 - adding front matter where practical
 - preserving provenance comments
 - validating Knowledge Pack structure
+- generating `index.json` discovery indexes
 - reporting curation warnings
 - keeping output deterministic
 
@@ -141,6 +142,33 @@ Unknown fields should be explicit, omitted, or left for human curation.
 
 ---
 
+# Index Generation Contract
+
+Foundry generates an optional `index.json` at the pack root.
+
+The command is:
+
+```text
+python -m tools.aegis_foundry.cli generate-index <path>
+```
+
+Foundry also generates `index.json` automatically when a pack is imported.
+
+The index contains:
+
+- `schema` — the index format identifier
+- `generated` — an ISO 8601 UTC timestamp
+- `generator` — the tool name (`AEGIS Foundry`)
+- `pack_id` — the pack identifier
+- `document_count` — the number of indexed documents
+- `documents` — lightweight per-document metadata (see PACK_SPEC)
+
+Index generation must be deterministic in document ordering, matching recursive
+document discovery. The index carries metadata only; document bodies remain in
+Markdown.
+
+---
+
 # Validation Contract
 
 Foundry validation must detect:
@@ -154,6 +182,18 @@ Foundry validation must detect:
 - malformed front matter
 - unsupported front matter fields
 - missing curated-pack README files
+
+Foundry index validation additionally reports, as warnings:
+
+- missing `index.json`
+- unreadable or malformed `index.json`
+- unrecognized index schema
+- indexed documents missing on disk
+- Markdown documents not represented in the index
+- index metadata that does not match the source document
+
+All index validation findings are non-fatal warnings. A missing or imperfect
+index must never fail validation, preserving compatibility with existing packs.
 
 Validation warnings are non-fatal.
 

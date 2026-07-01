@@ -181,6 +181,25 @@ Preserve existing behavior.
 
 If a regression appears, fix it before continuing.
 
+## Documentation Lifecycle
+
+Every engineering sprint follows the same sequence:
+
+1. Update specifications if architecture changes.
+2. Create `docs/SPRINT_xxx.md`.
+3. Create `.aegis/prompts/sprint-xxx.md`.
+4. Commit documentation.
+5. Produce an implementation plan.
+6. Approve the implementation plan.
+7. Implement the sprint.
+8. Validate Runtime and Foundry.
+9. Commit implementation.
+10. Tag the release.
+
+Documentation is considered part of the implementation.
+
+A sprint is not complete until both code and documentation are synchronized.
+
 ## Definition of Done
 
 A change is done only when:

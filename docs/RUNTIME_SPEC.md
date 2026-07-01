@@ -1,7 +1,7 @@
 # AEGIS OS
 # Runtime Specification
 
-Version: v0.11.5-alpha
+Version: v0.15.0-alpha
 Status: Platform Contract
 
 ---
@@ -93,6 +93,27 @@ docs/<folder>/<subfolder>/*.md
 Recursive document folders under `docs/` are part of the current Runtime contract.
 
 Document ordering must remain deterministic.
+
+---
+
+# Knowledge Pack Index Consumption
+
+Runtime may consume an optional `index.json` at the pack root to build its
+document list without parsing every Markdown document at startup.
+
+When loading a Knowledge Pack, Runtime:
+
+1. Reads `manifest.yaml`.
+2. If `index.json` is present, valid, and of a recognized schema, builds the
+   document list from the index. Document bodies are read on demand.
+3. Otherwise falls back to recursive Markdown discovery under `docs/**/*.md`.
+4. Opens Markdown only when the operator selects or searches a document.
+
+Fallback is mandatory. An absent, unreadable, or unrecognized index must never
+prevent a pack from loading. Packs with no index continue working unchanged.
+
+The operator must notice no behavioral difference. Only startup performance and
+scalability improve.
 
 ---
 
