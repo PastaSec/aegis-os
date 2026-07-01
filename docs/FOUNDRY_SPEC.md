@@ -96,11 +96,13 @@ Dry runs must not require opening or extracting PDF text.
 
 Foundry output must be compatible with PACK_SPEC.
 
-Current Runtime-compatible output places Markdown documents at:
+Runtime-compatible output places Markdown documents at:
 
 ```text
-knowledge/packs/<pack-id>/docs/*.md
+knowledge/packs/<pack-id>/docs/**/*.md
 ```
+
+Top-level `docs/*.md` files remain supported.
 
 Foundry may preserve curation material in:
 
@@ -151,7 +153,6 @@ Foundry validation must detect:
 - unreadable documents
 - malformed front matter
 - unsupported front matter fields
-- incompatible recursive document paths for current Runtime
 - missing curated-pack README files
 
 Validation warnings are non-fatal.
@@ -194,7 +195,7 @@ Foundry must preserve:
 
 - plain-file Knowledge Packs
 - deterministic output paths
-- Runtime-compatible Markdown output
+- Runtime-compatible Markdown output under `docs/**/*.md`
 - offline usability of generated packs
 - clean validation output
 - clear separation from Runtime behavior

@@ -23,7 +23,6 @@ SUPPORTED_FRONT_MATTER_FIELDS = {
 }
 ALLOWED_PACK_STATUSES = {"experimental", "curated", "validated", "official"}
 CURATED_PACK_STATUSES = {"curated", "validated", "official"}
-RUNTIME_DOCS_ONLY_MESSAGE = "Runtime currently loads docs/*.md only; recursive docs remain a future PACK_SPEC enhancement"
 
 
 @dataclass
@@ -155,11 +154,6 @@ def validate_document(path: Path, report: ValidationReport) -> None:
         report.warning(path, "document body is empty after front matter")
 
 
-def validate_runtime_document_path(path: Path, docs_dir: Path, report: ValidationReport) -> None:
-    if path.parent != docs_dir:
-        report.warning(path, RUNTIME_DOCS_ONLY_MESSAGE)
-
-
 def validate_pack(pack: KnowledgePackPath) -> ValidationReport:
     report = ValidationReport()
     manifest = validate_manifest(pack.path / "manifest.yaml", pack.path, report)
@@ -178,7 +172,6 @@ def validate_pack(pack: KnowledgePackPath) -> ValidationReport:
         report.warning(pack.path / "README.md", "README.md is recommended for curated Knowledge Packs")
 
     for document in documents:
-        validate_runtime_document_path(document, pack.docs_dir, report)
         validate_document(document, report)
 
     return report

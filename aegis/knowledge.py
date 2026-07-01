@@ -101,7 +101,7 @@ def load_pack(pack_path: Path) -> KnowledgePack | None:
 
     documents = []
     if docs_dir.exists():
-        for doc in sorted(docs_dir.glob("*.md")):
+        for doc in sorted(docs_dir.rglob("*.md")):
             documents.append(load_document(doc, data.get("name", pack_path.name)))
 
     return KnowledgePack(

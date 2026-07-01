@@ -53,7 +53,7 @@ knowledge/packs/<pack-id>/
     <document>.md
 ```
 
-Runtime currently loads top-level `docs/*.md` only. Recursive documents under `docs/` remain a future PACK_SPEC enhancement.
+Runtime loads Markdown documents from `docs/**/*.md`. Top-level `docs/*.md` files remain supported.
 
 Recommended manifest metadata:
 

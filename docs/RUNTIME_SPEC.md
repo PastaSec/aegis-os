@@ -40,7 +40,7 @@ Runtime owns:
 - loading Knowledge Packs from `knowledge/packs/`
 - reading pack manifests
 - listing available packs
-- loading Markdown documents from top-level `docs/*.md`
+- loading Markdown documents from `docs/**/*.md`
 - displaying Markdown documents
 - displaying supported document metadata
 - searching loaded Knowledge documents
@@ -79,18 +79,20 @@ Runtime expects:
 
 ```text
 manifest.yaml
-docs/*.md
+docs/**/*.md
 ```
 
-Runtime currently loads top-level Markdown documents only:
+Runtime loads top-level and nested Markdown documents:
 
 ```text
 docs/*.md
+docs/<folder>/*.md
+docs/<folder>/<subfolder>/*.md
 ```
 
-Recursive document folders under `docs/` are not part of the current Runtime contract.
+Recursive document folders under `docs/` are part of the current Runtime contract.
 
-Recursive document support remains a future PACK_SPEC and Runtime enhancement.
+Document ordering must remain deterministic.
 
 ---
 
@@ -183,7 +185,6 @@ Runtime must preserve:
 
 Future Runtime work may add:
 
-- recursive document loading
 - richer metadata display
 - document indexes
 - image display

@@ -18,15 +18,15 @@ Knowledge Packs must remain useful without AEGIS software.
 
 # Compatibility Rule
 
-AEGIS Runtime currently loads Markdown documents from:
+AEGIS Runtime loads Markdown documents from:
 
 ```text
-knowledge/packs/<pack-id>/docs/*.md
+knowledge/packs/<pack-id>/docs/**/*.md
 ```
 
-Recursive document folders under `docs/` are not part of the current Runtime contract.
+Top-level documents under `docs/*.md` remain supported.
 
-Recursive documents remain a future PACK_SPEC enhancement.
+Recursive document folders under `docs/` are part of the Runtime contract.
 
 ---
 
@@ -37,6 +37,8 @@ knowledge/packs/<pack-id>/
   manifest.yaml
   docs/
     <document>.md
+    <folder>/
+      <document>.md
 ```
 
 Recommended layout for curated packs:
@@ -47,6 +49,8 @@ knowledge/packs/<pack-id>/
   README.md
   docs/
     <document>.md
+    <folder>/
+      <document>.md
   sources/
   assets/
 ```
@@ -225,6 +229,8 @@ Foundry validates pack structure before deployment.
 Validation errors indicate invalid pack structure.
 
 Validation warnings indicate curation or compatibility concerns.
+
+Recursive Markdown documents under `docs/` are valid.
 
 Warnings are non-fatal unless a future release explicitly changes the validation policy.
 
