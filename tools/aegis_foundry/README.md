@@ -40,3 +40,37 @@ If PDF support is not installed, PDF imports fail with:
 ```text
 PDF import requires pypdf. Install Foundry PDF support first.
 ```
+
+## Curated Pack Standard
+
+Curated packs should use this Runtime-compatible layout:
+
+```text
+knowledge/packs/<pack-id>/
+  manifest.yaml
+  README.md
+  docs/
+    <document>.md
+```
+
+Runtime currently loads top-level `docs/*.md` only. Recursive documents under `docs/` remain a future PACK_SPEC enhancement.
+
+Recommended manifest metadata:
+
+- `status`: `experimental`, `curated`, `validated`, or `official`
+- `license`
+- `categories`
+- `tags`
+
+Recommended document metadata:
+
+- `title`
+- `category`
+- `tags`
+- `summary`
+- `source`
+- `source_url`
+- `imported_by`
+- `import_date`
+
+Foundry validation reports curation concerns as warnings. Warnings do not block validation or Runtime use.

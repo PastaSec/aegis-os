@@ -42,6 +42,10 @@ def command_inspect_pack(args: argparse.Namespace) -> int:
     if manifest:
         print(f"ID: {manifest.pack_id}")
         print(f"Version: {manifest.version}")
+        if manifest.status:
+            print(f"Status: {manifest.status}")
+        if manifest.license:
+            print(f"License: {manifest.license}")
         print(f"Description: {manifest.description}")
         print(f"Categories: {', '.join(manifest.categories) if manifest.categories else 'None'}")
         print(f"Tags: {', '.join(manifest.tags) if manifest.tags else 'None'}")

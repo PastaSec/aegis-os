@@ -37,6 +37,14 @@ class Manifest:
         return str(self.data.get("icon") or "")
 
     @property
+    def status(self) -> str:
+        return str(self.data.get("status") or "")
+
+    @property
+    def license(self) -> str:
+        return str(self.data.get("license") or "")
+
+    @property
     def categories(self) -> list[str]:
         return list_values(self.data.get("categories"))
 

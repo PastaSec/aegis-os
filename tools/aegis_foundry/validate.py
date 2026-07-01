@@ -16,7 +16,14 @@ SUPPORTED_FRONT_MATTER_FIELDS = {
     "author",
     "revision",
     "summary",
+    "source",
+    "source_url",
+    "imported_by",
+    "import_date",
 }
+ALLOWED_PACK_STATUSES = {"experimental", "curated", "validated", "official"}
+CURATED_PACK_STATUSES = {"curated", "validated", "official"}
+RUNTIME_DOCS_ONLY_MESSAGE = "Runtime currently loads docs/*.md only; recursive docs remain a future PACK_SPEC enhancement"
 
 
 @dataclass
@@ -102,6 +109,15 @@ def validate_manifest(path: Path, pack_dir: Path, report: ValidationReport) -> M
     if icon is not None and not isinstance(icon, str):
         report.warning(path, "icon should be a string")
 
+    status = str(manifest.data.get("status") or "").strip()
+    if status and status not in ALLOWED_PACK_STATUSES:
+        allowed = ", ".join(sorted(ALLOWED_PACK_STATUSES))
+        report.warning(path, f"status should be one of: {allowed}")
+
+    license_value = manifest.data.get("license")
+    if license_value is not None and not isinstance(license_value, str):
+        report.warning(path, "license should be a string")
+
     if manifest.pack_id and manifest.pack_id != pack_dir.name:
         report.warning(path, f"id '{manifest.pack_id}' does not match directory '{pack_dir.name}'")
 
@@ -139,6 +155,11 @@ def validate_document(path: Path, report: ValidationReport) -> None:
         report.warning(path, "document body is empty after front matter")
 
 
+def validate_runtime_document_path(path: Path, docs_dir: Path, report: ValidationReport) -> None:
+    if path.parent != docs_dir:
+        report.warning(path, RUNTIME_DOCS_ONLY_MESSAGE)
+
+
 def validate_pack(pack: KnowledgePackPath) -> ValidationReport:
     report = ValidationReport()
     manifest = validate_manifest(pack.path / "manifest.yaml", pack.path, report)
@@ -153,7 +174,11 @@ def validate_pack(pack: KnowledgePackPath) -> ValidationReport:
         report.error(pack.docs_dir, "at least one Markdown document is required")
         return report
 
+    if manifest and manifest.status in CURATED_PACK_STATUSES and not (pack.path / "README.md").exists():
+        report.warning(pack.path / "README.md", "README.md is recommended for curated Knowledge Packs")
+
     for document in documents:
+        validate_runtime_document_path(document, pack.docs_dir, report)
         validate_document(document, report)
 
     return report

@@ -20,23 +20,25 @@ Knowledge is distributed as packs.
 
 ---
 
-## Folder Structure
+## Production Folder Structure
 
+```text
+knowledge/packs/<pack-id>/
+  manifest.yaml
+  README.md
+  docs/
+    <document>.md
+  sources/
+  assets/
 ```
-Florida-Hurricane.akp/
 
-manifest.yaml
+`README.md` is recommended for every curated pack.
 
-README.md
+Current Runtime support is intentionally narrower than the full AKP vision:
 
-docs/
-
-images/
-
-pdf/
-
-assets/
-```
+* Runtime loads Markdown documents from top-level `docs/*.md`.
+* Recursive document folders under `docs/` remain a future PACK_SPEC enhancement.
+* `sources/` and `assets/` are preserved for curation and future Runtime support, but they are not required for Runtime document loading today.
 
 ---
 
@@ -46,20 +48,121 @@ assets/
 name: Florida Hurricane Guide
 id: florida-hurricane
 version: 1.0.0
+status: curated
 author: NOAA
 license: Public Domain
-
 description: Hurricane preparation for Florida residents.
-
 categories:
   - Florida
   - Emergency
-
 tags:
   - hurricane
   - flooding
   - generator
 ```
+
+Required manifest fields:
+
+* name
+* id
+* version
+* description
+
+Optional manifest fields:
+
+* status
+* author
+* license
+* icon
+* categories
+* tags
+* source
+* homepage
+
+Allowed `status` values:
+
+* experimental
+* curated
+* validated
+* official
+
+---
+
+## Document Metadata
+
+Production documents should include front matter when practical:
+
+```yaml
+---
+title: Generator Safety
+category: Power
+tags:
+  - generator
+  - outage
+author: FEMA / Ready.gov
+revision: 2026
+summary: Safe generator operation during power outages.
+source: Ready.gov Power Outages
+source_url: https://www.ready.gov/power-outages
+imported_by: AEGIS Foundry
+import_date: 2026-07-01
+---
+```
+
+Recommended fields:
+
+* title
+* category
+* tags
+* summary
+
+Optional fields:
+
+* author
+* revision
+* source
+* source_url
+* imported_by
+* import_date
+
+---
+
+## Category Taxonomy
+
+Use a small controlled vocabulary for document categories:
+
+* Preparedness
+* Power
+* Communications
+* Networking
+* Medical
+* Hardware
+* Operations
+* Recovery
+* Security
+* Navigation
+* Reference
+
+Pack-level `categories` describe the broad pack domain.
+
+Document-level `category` describes the operator task area.
+
+---
+
+## Curation Workflow
+
+1. Import source material with Foundry into a temporary pack.
+2. Review generated Markdown for readability.
+3. Normalize filenames to stable lowercase slugs.
+4. Add or correct front matter.
+5. Preserve provenance comments.
+6. Remove extraction noise, duplicate headers, and broken formatting.
+7. Write concise field-use summaries.
+8. Apply controlled categories and useful tags.
+9. Add a pack `README.md`.
+10. Validate the pack before deployment.
+
+Foundry validation may warn about curation issues, but those warnings remain non-fatal.
 
 ---
 
@@ -71,7 +174,7 @@ tags:
 * Images
 * Plain Text
 
-Future
+Future:
 
 * EPUB
 * ZIM

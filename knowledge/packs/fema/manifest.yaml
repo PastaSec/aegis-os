@@ -1,0 +1,17 @@
+name: FEMA Preparedness
+id: fema
+version: 0.1.0
+status: curated
+icon: FEMA
+license: U.S. Government Work
+description: Curated FEMA and Ready.gov preparedness references for field use.
+categories:
+  - Preparedness
+  - Operations
+  - Recovery
+tags:
+  - fema
+  - ready.gov
+  - emergency kit
+  - evacuation
+  - power outage
