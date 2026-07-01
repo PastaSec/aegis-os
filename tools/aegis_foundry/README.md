@@ -10,7 +10,33 @@ Foundry performs heavier preparation work on a desktop or development machine.
 
 Run from the repository root.
 
-`powershell
+```powershell
 python -m tools.aegis_foundry.cli list-packs
 python -m tools.aegis_foundry.cli inspect-pack florida
 python -m tools.aegis_foundry.cli validate
+python -m tools.aegis_foundry.cli import-folder .\source-docs field-pack --output .\.tmp\packs
+```
+
+## Import Support
+
+`import-folder` creates Runtime-ready Knowledge Packs from source folders.
+
+Supported source files:
+
+- Markdown: `.md`, `.markdown`
+- Plain text: `.txt`
+- Text-based PDF: `.pdf`
+
+PDF import is a Foundry-only capability. It extracts readable text and writes Markdown documents with front matter and an AEGIS Foundry provenance comment. It does not perform OCR, image extraction, layout-perfect conversion, or Runtime PDF viewing.
+
+Install PDF support before importing PDFs:
+
+```powershell
+python -m pip install .[foundry-pdf]
+```
+
+If PDF support is not installed, PDF imports fail with:
+
+```text
+PDF import requires pypdf. Install Foundry PDF support first.
+```

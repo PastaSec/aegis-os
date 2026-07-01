@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import io
+import logging
 import re
 import shutil
+from collections.abc import Iterator
+from contextlib import contextmanager, redirect_stderr
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -11,8 +15,9 @@ from tools.aegis_foundry.pack import DEFAULT_PACKS_DIR, KnowledgePackPath, resol
 from tools.aegis_foundry.validate import split_front_matter, validate_pack
 
 
-SUPPORTED_SOURCE_SUFFIXES = {".md", ".markdown", ".txt"}
+SUPPORTED_SOURCE_SUFFIXES = {".md", ".markdown", ".pdf", ".txt"}
 PACK_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+PYPDF_REQUIRED_MESSAGE = "PDF import requires pypdf. Install Foundry PDF support first."
 
 
 @dataclass
@@ -74,7 +79,14 @@ def import_folder(options: ImportOptions) -> ImportResult:
     if pack_path.exists() and options.overwrite:
         shutil.rmtree(pack_path)
 
-    write_pack(options, pack_path, source, sources, output_paths)
+    try:
+        write_pack(options, pack_path, source, sources, output_paths)
+    except ImportError as exc:
+        result.errors.append(str(exc))
+        return result
+    except ValueError as exc:
+        result.errors.append(str(exc))
+        return result
     result.validation = validate_pack(KnowledgePackPath(path=pack_path))
     return result
 
@@ -141,14 +153,18 @@ def write_pack(
     sources: list[Path],
     output_paths: list[Path],
 ) -> None:
+    rendered_documents = []
+    for source, output in zip(sources, output_paths):
+        relative_source = source.relative_to(source_root).as_posix()
+        rendered_documents.append((output, render_document(source, relative_source, options)))
+
     docs_root = pack_path / "docs"
     docs_root.mkdir(parents=True, exist_ok=True)
     write_manifest(pack_path / "manifest.yaml", options)
 
-    for source, output in zip(sources, output_paths):
+    for output, text in rendered_documents:
         output.parent.mkdir(parents=True, exist_ok=True)
-        relative_source = source.relative_to(source_root).as_posix()
-        output.write_text(render_document(source, relative_source, options), encoding="utf-8")
+        output.write_text(text, encoding="utf-8")
 
 
 def write_manifest(path: Path, options: ImportOptions) -> None:
@@ -169,6 +185,9 @@ def write_manifest(path: Path, options: ImportOptions) -> None:
 
 
 def render_document(source: Path, relative_source: str, options: ImportOptions) -> str:
+    if source.suffix.lower() == ".pdf":
+        return render_pdf_document(source, relative_source, options)
+
     text = source.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
     if source.suffix.lower() in {".md", ".markdown"}:
         return render_markdown_document(source, relative_source, text, options)
@@ -189,6 +208,70 @@ def render_markdown_document(source: Path, relative_source: str, text: str, opti
 def render_text_document(source: Path, relative_source: str, text: str, options: ImportOptions) -> str:
     metadata = default_metadata(source, relative_source, options)
     return front_matter(metadata) + provenance_comment(relative_source) + ensure_heading(text, metadata["title"])
+
+
+def render_pdf_document(source: Path, relative_source: str, options: ImportOptions) -> str:
+    text = extract_pdf_text(source)
+    metadata = default_metadata(source, relative_source, options)
+    return front_matter(metadata) + provenance_comment(relative_source) + ensure_heading(text, metadata["title"])
+
+
+def extract_pdf_text(source: Path) -> str:
+    try:
+        from pypdf import PdfReader
+    except ModuleNotFoundError as exc:
+        raise ImportError(PYPDF_REQUIRED_MESSAGE) from exc
+
+    with quiet_pypdf_logs(), redirect_stderr(io.StringIO()):
+        try:
+            reader = PdfReader(str(source))
+        except Exception as exc:
+            raise ValueError(f"PDF could not be read: {source}: {format_exception_message(exc)}") from exc
+
+        pages: list[str] = []
+        for index, page in enumerate(reader.pages, start=1):
+            try:
+                page_text = page.extract_text() or ""
+            except Exception as exc:
+                detail = format_exception_message(exc)
+                raise ValueError(f"PDF page {index} could not be read: {source}: {detail}") from exc
+
+            normalized = normalize_extracted_text(page_text)
+            if normalized:
+                pages.append(render_pdf_page(index, normalized, len(reader.pages)))
+
+    text = "\n\n".join(pages).strip()
+    if not text:
+        raise ValueError(f"PDF contains no extractable text: {source}")
+    return text + "\n"
+
+
+@contextmanager
+def quiet_pypdf_logs() -> Iterator[None]:
+    logger = logging.getLogger("pypdf")
+    previous_disabled = logger.disabled
+    logger.disabled = True
+    try:
+        yield
+    finally:
+        logger.disabled = previous_disabled
+
+
+def format_exception_message(exc: Exception) -> str:
+    return " ".join(str(exc).split())
+
+
+def normalize_extracted_text(text: str) -> str:
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    normalized = re.sub(r"\n{3,}", "\n\n", normalized)
+    normalized = "\n".join(line.rstrip() for line in normalized.splitlines())
+    return normalized.strip()
+
+
+def render_pdf_page(index: int, text: str, page_count: int) -> str:
+    if page_count <= 1:
+        return text
+    return f"## Page {index}\n\n{text}"
 
 
 def default_metadata(source: Path, relative_source: str, options: ImportOptions) -> dict[str, object]:

@@ -22,6 +22,11 @@ dependencies = [
     "pillow"
 ]
 
+[project.optional-dependencies]
+foundry-pdf = [
+    "pypdf"
+]
+
 [project.scripts]
 aegis = "aegis.app:main"
 
