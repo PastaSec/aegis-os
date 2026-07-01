@@ -7,6 +7,7 @@ from aegis.inventory import categories as inventory_categories, items as invento
 from aegis.journal import categories as journal_categories, entries as journal_entries
 from aegis.knowledge import load_document, load_packs
 from aegis.models.document_viewer import DocumentViewState
+from aegis.models.knowledge_navigator import navigator_entries, parent_path, root_path
 from aegis.operator import (
     get_position,
     load_operator_state,
@@ -85,6 +86,7 @@ class AegisDashboard(App):
 
         self.current_pack = None
         self.current_doc = None
+        self.current_knowledge_path = None
 
         self.current_journal_category = None
         self.current_journal_entry = None
@@ -180,6 +182,13 @@ class AegisDashboard(App):
     def action_back(self) -> None:
         if self.view == "document":
             self.save_document_position()
+        elif self.view == "pack" and self.current_pack and self.current_knowledge_path:
+            root = root_path(self.current_pack)
+            if root and self.current_knowledge_path != root:
+                self.current_knowledge_path = parent_path(self.current_pack, self.current_knowledge_path)
+                self.selected = 0
+                self.draw()
+                return
         route = self.router.back()
         self.selected = route.selected
         self.draw()
@@ -211,7 +220,7 @@ class AegisDashboard(App):
         if self.view == "knowledge":
             return len(self.packs)
         if self.view == "pack" and self.current_pack:
-            return len(self.current_pack.documents)
+            return len(navigator_entries(self.current_pack, self.current_knowledge_path))
         if self.view == "recent_documents":
             return len(self.recent_documents)
         if self.view == "favorites":
@@ -304,10 +313,18 @@ class AegisDashboard(App):
 
         elif self.view == "knowledge" and self.packs:
             self.current_pack = self.packs[self.selected]
+            self.current_knowledge_path = root_path(self.current_pack)
             self.navigate("pack")
 
-        elif self.view == "pack" and self.current_pack and self.current_pack.documents:
-            self.open_document(self.current_pack.documents[self.selected])
+        elif self.view == "pack" and self.current_pack:
+            entries = navigator_entries(self.current_pack, self.current_knowledge_path)
+            if entries:
+                entry = entries[self.selected]
+                if entry.is_folder:
+                    self.current_knowledge_path = entry.path
+                    self.selected = 0
+                elif entry.document:
+                    self.open_document(entry.document)
 
         elif self.view == "recent_documents" and self.recent_documents:
             self.open_document(self.recent_documents[self.selected])
@@ -340,6 +357,7 @@ class AegisDashboard(App):
             source = result.pack_name.split("/", 1)[1] if "/" in result.pack_name else result.pack_name
             self.current_doc = load_document(result.path, source)
             self.current_pack = None
+            self.current_knowledge_path = None
             self.open_document(self.current_doc)
 
         self.draw()
@@ -353,7 +371,8 @@ class AegisDashboard(App):
             self.write(render_knowledge_screen(self.packs, self.selected))
 
         elif self.view == "pack":
-            self.write(render_pack_screen(self.current_pack, self.selected))
+            entries = navigator_entries(self.current_pack, self.current_knowledge_path)
+            self.write(render_pack_screen(self.current_pack, entries, self.selected, self.current_knowledge_path))
 
         elif self.view == "recent_documents":
             self.write(render_operator_documents_screen("Recent Documents", self.recent_documents, self.selected))

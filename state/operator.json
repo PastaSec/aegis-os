@@ -1,0 +1,31 @@
+{
+  "recent": [
+    {
+      "title": "Power Outage Safety",
+      "path": "knowledge/packs/fema/docs/power-outage.md",
+      "pack": "FEMA Preparedness"
+    },
+    {
+      "title": "Hurricane Preparedness",
+      "path": "knowledge/packs/fema/docs/hurricane-preparedness.md",
+      "pack": "FEMA Preparedness"
+    },
+    {
+      "title": "Evacuation Planning",
+      "path": "knowledge/packs/fema/docs/evacuation.md",
+      "pack": "FEMA Preparedness"
+    },
+    {
+      "title": "Emergency Supply Kit",
+      "path": "knowledge/packs/fema/docs/emergency-supply-kit.md",
+      "pack": "FEMA Preparedness"
+    }
+  ],
+  "favorites": [],
+  "positions": {
+    "knowledge/packs/fema/docs/emergency-supply-kit.md": 24,
+    "knowledge/packs/fema/docs/evacuation.md": 23,
+    "knowledge/packs/fema/docs/hurricane-preparedness.md": 16,
+    "knowledge/packs/fema/docs/power-outage.md": 14
+  }
+}

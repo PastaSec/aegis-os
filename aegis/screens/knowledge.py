@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Protocol
 
 from aegis.knowledge import KnowledgePack, read_document
+from aegis.models.knowledge_navigator import NavigatorEntry, relative_label, root_path
 from aegis.models.document_viewer import DEFAULT_DOCUMENT_HEIGHT
 from aegis.widgets.frame import render_frame
 from aegis.widgets.listbox import render_listbox
@@ -45,11 +46,17 @@ def render_knowledge_screen(packs: list[KnowledgePack], selected: int) -> str:
     return render_frame("Knowledge", f"Packs: {len(items)}", render_listbox(items, selected))
 
 
-def render_pack_screen(pack: KnowledgePack | None, selected: int) -> str:
-    docs = pack.documents if pack else []
-    items = [doc.title for doc in docs]
+def render_pack_screen(
+    pack: KnowledgePack | None,
+    entries: list[NavigatorEntry],
+    selected: int,
+    current_path: Path | None = None,
+) -> str:
+    items = [entry.label for entry in entries]
     title = pack.name if pack else "Pack"
-    return render_frame(title, "Documents", render_listbox(items, selected))
+    root = root_path(pack)
+    subtitle = relative_label(root, current_path) if root and current_path else "Documents"
+    return render_frame(title, subtitle, render_listbox(items, selected))
 
 
 def render_document_screen(
